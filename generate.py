@@ -12,7 +12,7 @@ warnings.filterwarnings('error')
 
 from qsc.newton import logger
 def warning(msg, *args, **kwargs):
-    raise Warning(msg)
+    raise RuntimeWarning(msg)
 logger.warning = warning
 
 # -----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ while True:
 f.close()
 
 # -----------------------------------------------------------------------------
-# try reading the file, to check how the results will look like
+# try reading the file, to check the results
 
 df = pd.read_csv(fname)
 if len(df) > 0:
