@@ -77,8 +77,8 @@ while True:
                   iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
                   L_grad_grad_B, B20_variation, beta, DMerc_times_r2]
         
-        print(','.join([str(val) for val in values]))
-        print(','.join([str(val) for val in values]), file=f)
+        print(','.join([str(value) for value in values]))
+        print(','.join([str(value) for value in values]), file=f)
 
     except Warning:
         continue
