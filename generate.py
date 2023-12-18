@@ -4,6 +4,15 @@ import pandas as pd
 from qsc import Qsc
 from qsc.util import mu0, fourier_minimum
 
+from pathlib import Path
+
+# -----------------------------------------------------------------------------
+# set up the output directory
+DATA_DIR = Path('data')
+DATA_DIR.mkdir(exist_ok=True, parents=True)
+# set up file name 
+fname = DATA_DIR / 'dataset.csv'
+
 # -----------------------------------------------------------------------------
 # set up warning behavior, turn warnings into exceptions
 
@@ -17,15 +26,18 @@ logger.warning = warning
 
 # -----------------------------------------------------------------------------
 
-fname = 'dataset.csv'
-f = open(fname, 'w')
+# fname = 'dataset.csv'
+# f = open(fname, 'w')
 
 fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2',
           'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 'r_singularity',
           'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2']
 
-print(','.join(fields))
-print(','.join(fields), file=f)
+# print(','.join(fields))
+# print(','.join(fields), file=f)
+if not fname.exists():
+    df = pd.DataFrame(columns=fields)
+    df.to_csv(fname, index=False)
 
 while True:
 
@@ -63,22 +75,25 @@ while True:
         beta           = -mu0 * p2 * stel.r_singularity**2 / stel.B0**2
         DMerc_times_r2 = stel.DMerc_times_r2
 
-#        assert iota >= 0.2
-#        assert max_elongation <= 10.
-#        assert min_L_grad_B >= 0.1
-#        assert min_R0 >= 0.3
-#        assert r_singularity >= 0.05
-#        assert L_grad_grad_B >= 0.1
-#        assert B20_variation <= 5.
-#        assert beta >= 1e-4
-#        assert DMerc_times_r2 > 0.
+        # assert iota >= 0.2
+        # assert max_elongation <= 10.
+        # assert min_L_grad_B >= 0.1
+        # assert min_R0 >= 0.3
+        # assert r_singularity >= 0.05
+        # assert L_grad_grad_B >= 0.1
+        # assert B20_variation <= 5.
+        # assert beta >= 1e-4
+        # assert DMerc_times_r2 > 0.
 
         values = [rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2,
                   iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
                   L_grad_grad_B, B20_variation, beta, DMerc_times_r2]
         
-        print(','.join([str(value) for value in values]))
-        print(','.join([str(value) for value in values]), file=f)
+        df = pd.DataFrame([values], columns=fields)
+        df.to_csv(fname, mode='a', header=False, index=False)
+        
+        # print(','.join([str(value) for value in values]))
+        # print(','.join([str(value) for value in values]), file=f)
 
     except Warning:
         continue
@@ -88,8 +103,6 @@ while True:
 
     except KeyboardInterrupt:
         break
-
-f.close()
 
 # -----------------------------------------------------------------------------
 # try reading the file, to check the results
