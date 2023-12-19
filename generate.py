@@ -4,15 +4,6 @@ import pandas as pd
 from qsc import Qsc
 from qsc.util import mu0, fourier_minimum
 
-from pathlib import Path
-
-# -----------------------------------------------------------------------------
-# set up the output directory
-DATA_DIR = Path('data')
-DATA_DIR.mkdir(exist_ok=True, parents=True)
-# set up file name 
-fname = DATA_DIR / 'dataset.csv'
-
 # -----------------------------------------------------------------------------
 # set up warning behavior, turn warnings into exceptions
 
@@ -25,19 +16,33 @@ def warning(msg, *args, **kwargs):
 logger.warning = warning
 
 # -----------------------------------------------------------------------------
+# set up the output directory, and the output file
 
-# fname = 'dataset.csv'
-# f = open(fname, 'w')
+from pathlib import Path
 
-fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2',
-          'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 'r_singularity',
-          'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2']
+DATA_DIR = Path('data')
+DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-# print(','.join(fields))
-# print(','.join(fields), file=f)
+fname = DATA_DIR.joinpath('dataset.csv')
+
+# -----------------------------------------------------------------------------
+# open the output file for writing or appending
+
 if not fname.exists():
-    df = pd.DataFrame(columns=fields)
-    df.to_csv(fname, index=False)
+    f = open(fname, 'w')
+
+    fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2',
+            'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 'r_singularity',
+            'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2']
+
+    print(','.join(fields))
+    print(','.join(fields), file=f)
+
+else:
+    f = open(fname, 'a')
+
+# -----------------------------------------------------------------------------
+# keep generating until keyboard interrupt
 
 while True:
 
@@ -75,7 +80,7 @@ while True:
         beta           = -mu0 * p2 * stel.r_singularity**2 / stel.B0**2
         DMerc_times_r2 = stel.DMerc_times_r2
 
-        # assert iota >= 0.2
+        # assert np.fabs(iota) >= 0.2
         # assert max_elongation <= 10.
         # assert min_L_grad_B >= 0.1
         # assert min_R0 >= 0.3
@@ -88,12 +93,12 @@ while True:
         values = [rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2,
                   iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
                   L_grad_grad_B, B20_variation, beta, DMerc_times_r2]
-        
-        df = pd.DataFrame([values], columns=fields)
-        df.to_csv(fname, mode='a', header=False, index=False)
-        
-        # print(','.join([str(value) for value in values]))
-        # print(','.join([str(value) for value in values]), file=f)
+
+        assert not np.isnan(values).any()
+        assert not np.isinf(values).any()
+
+        print(','.join([str(value) for value in values]))
+        print(','.join([str(value) for value in values]), file=f)
 
     except Warning:
         continue
@@ -105,7 +110,12 @@ while True:
         break
 
 # -----------------------------------------------------------------------------
-# try reading the file, to check the results
+# close the output file
+
+f.close()
+
+# -----------------------------------------------------------------------------
+# try reading the file to check the results
 
 df = pd.read_csv(fname)
 if len(df) > 0:
