@@ -9,11 +9,19 @@ from tabulate import tabulate
 
 class StellatorsDataSet(Dataset):
     def __init__(self, npy_file, transform=None, normalization=None, sample_size=None):
-        # Load data from the .npy file
-        if sample_size:
-            self.data = np.load(npy_file)[:sample_size, :]
-        else:
+        # If npy_file is a npy array
+        if isinstance(npy_file, np.ndarray):
+            self.data = npy_file
+        elif npy_file.endswith('.npy'):
             self.data = np.load(npy_file)
+        # If npy_file is a path to a npy file
+        else:
+            raise TypeError("npy_file should be a path to a npy file or a npy array")
+        
+        # If sample_size is specified, only use the first sample_size rows
+        if sample_size:
+            self.data = self.data[:sample_size, :]
+        
         self.transform = transform
         self.normalization = normalization
         self.features = self.data[:, 10:]
@@ -154,7 +162,7 @@ class StellatorsDataSet(Dataset):
             plt.show()
 
 
-    def calculate_data_counts(self, IOTA_MIN, MAX_ELONGATION, MIN_MIN_L_GRAD_B, MIN_MIN_R0, MIN_R_SINGULARITY, MIN_L_GRAD_GRAD_B, MAX_B20_VARIATION, MIN_BETA, MIN_DMERC_TIMES_R2):
+    def calculate_data_counts(self, IOTA_MIN, MAX_ELONGATION, MIN_MIN_L_GRAD_B, MIN_MIN_R0, MIN_R_SINGULARITY, MIN_L_GRAD_GRAD_B, MAX_B20_VARIATION, MIN_BETA, MIN_DMERC_TIMES_R2, return_object=False):
         file = self.data
         # 9 features to check 
         iota = np.count_nonzero(np.fabs(file[:, 10]) >= IOTA_MIN)
@@ -215,3 +223,16 @@ class StellatorsDataSet(Dataset):
 
         # Print the table
         print(tabulate(data, headers=['Feature', 'Counts', 'Per of Data'], tablefmt='grid'))
+
+        # Return an object that respects all the restrictions
+        if return_object:
+            ##### Need to specify a deep copy of the data and then replace self.data and then return
+            return StellatorsDataSet(file[(np.fabs(file[:, 10]) >= IOTA_MIN) &
+                        (file[:, 11] <= MAX_ELONGATION) &
+                        (np.fabs(file[:, 12]) >= MIN_MIN_L_GRAD_B) &
+                        (file[:, 13] >= MIN_MIN_R0) &
+                        (file[:, 14] >= MIN_R_SINGULARITY) &
+                        (np.fabs(file[:, 15]) >= MIN_L_GRAD_GRAD_B) &
+                        (file[:, 16] <= MAX_B20_VARIATION)
+                        & (file[:, 17] >= MIN_BETA)
+                        & (file[:, 18] > MIN_DMERC_TIMES_R2)])
