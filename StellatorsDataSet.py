@@ -141,18 +141,23 @@ class StellatorsDataSet(Dataset):
         # View correlations using a percentage of the data
         subset_size = int((percentage / 100) * len(self.data))
         if variables == 'features':
-            subset_features = pd.DataFrame(self.features[:subset_size, :], columns=[key for key in self.features_dict.keys()])
+            subset = pd.DataFrame(self.features[:subset_size, :], columns=[key for key in self.features_dict.keys()])
         elif variables == 'labels':
-            subset_features = pd.DataFrame(self.labels[:subset_size, :], columns=[key for key in self.labels_dict.keys()])
+            subset = pd.DataFrame(self.labels[:subset_size, :], columns=[key for key in self.labels_dict.keys()])
+        elif variables == 'all':
+            subset = pd.DataFrame(self.data[:subset_size, :], columns=[key for key in self.data_dict.keys()])
 
         plt.figure(figsize=(12, 18))
         sns.set(style="white")
 
         # Compute the correlation matrix for the inputs 
-        correlation_matrix = subset_features.corr(method=method)
+        correlation_matrix = subset.corr(method=method)
 
         sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
-        plt.title(f"Feature Correlations (Method: {method.capitalize()}, {percentage}% of Data)")
+        plt.title(f"{variables.capitalize()} Correlations (Method: {method.capitalize()}, {percentage}% of Data)")
+        # Tilt the x-axis labels
+        plt.xticks(rotation=35)
+        plt.yticks(rotation=35)
 
         # Save figure if filename is specified
         if filename:
@@ -235,4 +240,6 @@ class StellatorsDataSet(Dataset):
                         (np.fabs(file[:, 15]) >= MIN_L_GRAD_GRAD_B) &
                         (file[:, 16] <= MAX_B20_VARIATION)
                         & (file[:, 17] >= MIN_BETA)
-                        & (file[:, 18] > MIN_DMERC_TIMES_R2)])
+                        & (file[:, 18] > MIN_DMERC_TIMES_R2)],
+                        transform=self.transform,
+                        normalization=self.normalization)
