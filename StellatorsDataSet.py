@@ -6,6 +6,7 @@ from typing import Tuple
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tabulate import tabulate
+from qsc import Qsc
 
 class StellatorsDataSet(Dataset):
     def __init__(self, npy_file, transform=None, normalization=None, sample_size=None):
@@ -68,8 +69,11 @@ class StellatorsDataSet(Dataset):
                             'etabar' : 7,
                             'B2c' : 8,
                             'p2' : 9}
+        
+    
     def __len__(self):
         return len(self.data)
+
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         # Returns one sample of the data, data and label (X, y).
@@ -77,8 +81,23 @@ class StellatorsDataSet(Dataset):
         labels = torch.tensor(self.data[idx, :10], dtype=torch.float32)
 
         return features, labels
+    
+    #------------------------------------------------------------------------------
+    # Iterate over the dataset and return a Qsc object
+    def __iter__(self):
+        self.index = 0
+        return self
 
+    def __next__(self):
+        if self.index < len(self.data):
+            result = self.data[self.index]
+            self.index += 1
+            return Qsc(rc=[1., result[0], result[1], result[2]], zs=[0., result[3], result[4], result[5]], nfp=result[6], etabar=result[7], B2c=result[8], p2=result[9], order='r2')
+        else:
+            raise StopIteration
 
+    #------------------------------------------------------------------------------
+    # View the distributions of the dataset
     def view_distributions(self, variables=None, percentage=100, filename=None, show=True, overlap=False):
         """
         Plots the distribution of the specified variables from the dataset.
@@ -151,7 +170,8 @@ class StellatorsDataSet(Dataset):
                 if show:
                     plt.show()
     
-
+    #------------------------------------------------------------------------------
+    # View the correlations between the features and the labels
     def view_correlations(self, percentage=100, method='pearson', filename=None, show=True, variables='features'):
         """
         Plots a heatmap of the correlations between the specified variables from the dataset.
@@ -276,3 +296,11 @@ class StellatorsDataSet(Dataset):
                         & (file[:, 18] > MIN_DMERC_TIMES_R2)],
                         transform=self.transform,
                         normalization=self.normalization)
+
+    def getQSC(self, idx):
+        try:
+            try_one = self.labels[idx]
+            stel = Qsc(rc=[1., try_one[0], try_one[1], try_one[2]], zs=[0., try_one[3], try_one[4], try_one[5]], nfp=try_one[6], etabar=try_one[7], B2c=try_one[8], p2=try_one[9], order='r2')
+            return stel
+        except:
+            return None
