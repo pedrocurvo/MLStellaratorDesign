@@ -96,6 +96,9 @@ while True:
 
         assert not np.isnan(values).any()
         assert not np.isinf(values).any()
+        
+        # Assert that no value is above 1e9
+        assert all(value <= 1e9 for value in values)
 
         print(','.join([str(value) for value in values]))
         print(','.join([str(value) for value in values]), file=f)
