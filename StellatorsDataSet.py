@@ -14,6 +14,8 @@ class StellatorsDataSet(Dataset):
             self.data = npy_file
         elif npy_file.endswith('.npy'):
             self.data = np.load(npy_file)
+        elif npy_file.endswith('.csv'):
+            self.data = pd.read_csv(npy_file).to_numpy()
         # If npy_file is a path to a npy file
         else:
             raise TypeError("npy_file should be a path to a npy file or a npy array")
@@ -78,6 +80,28 @@ class StellatorsDataSet(Dataset):
 
 
     def view_distributions(self, variables=None, percentage=100, filename=None, show=True, overlap=False):
+        """
+        Plots the distribution of the specified variables from the dataset.
+
+        Args:
+            variables (str, list): The variable(s) to plot. Should be a string or a list of strings. 
+                If 'features', all features will be plotted. If 'labels', all labels will be plotted.
+            percentage (int, optional): The percentage of the data to include in the plot. Defaults to 100.
+            filename (str, optional): If specified, the plot will be saved as this filename. Defaults to None.
+            show (bool, optional): If True, the plot will be displayed. Defaults to True.
+            overlap (bool, optional): If True, the distributions of all variables will be plotted on the same graph. Defaults to False.
+
+        Raises:
+            ValueError: If no variables are provided or if the percentage is not between 0 and 100.
+            TypeError: If variables is not a string or a list of strings.
+
+        Returns:
+            None
+        """
+        if variables == 'features':
+            variables = [key for key in self.features_dict.keys()]
+        elif variables == 'labels':
+            variables = [key for key in self.labels_dict.keys()]
         # Validate inputs
         if not variables:
             raise ValueError("No variables provided")
@@ -99,12 +123,7 @@ class StellatorsDataSet(Dataset):
         if overlap:
             plt.figure(figsize=(15, 10))
             for variable in variables:
-                try:
-                    # Plot the distribution of the variable with a kde if continuous
-                    sns.histplot(self.data[:subset_size, self.data_dict[variable]], kde=True)
-                except:
-                    # Plot the distribution of the variable without a kde if discrete
-                    sns.histplot(self.data[:subset_size, self.data_dict[variable]])
+                sns.histplot(self.data[:subset_size, self.data_dict[variable]], kde=True)
             # Set the title of the plot
             title = f"{' , '.join(variables).capitalize()} Distribution ({percentage}% of Data)"
             plt.title(title)
@@ -119,12 +138,8 @@ class StellatorsDataSet(Dataset):
         else:
             for variable in variables:
                 plt.figure(figsize=(15, 10))
-                try:
-                    # Plot the distribution of the variable with a kde if continuous
-                    sns.histplot(self.data[:subset_size, self.data_dict[variable]], kde=True)
-                except:
-                    # Plot the distribution of the variable without a kde if discrete
-                    sns.histplot(self.data[:subset_size, self.data_dict[variable]])
+                # Plot the distribution of the variable with a kde if continuous
+                sns.histplot(self.data[:subset_size, self.data_dict[variable]], kde=True, bins=10)
                 # Set the title of the plot
                 plt.title(f"{variable.capitalize()} Distribution ({percentage}% of Data)")
                 plt.tight_layout()
@@ -138,6 +153,24 @@ class StellatorsDataSet(Dataset):
     
 
     def view_correlations(self, percentage=100, method='pearson', filename=None, show=True, variables='features'):
+        """
+        Plots a heatmap of the correlations between the specified variables from the dataset.
+
+        Args:
+            percentage (int, optional): The percentage of the data to include in the plot. Defaults to 100.
+            method (str, optional): The method to use for computing correlations. Defaults to 'pearson'.
+            filename (str, optional): If specified, the plot will be saved as this filename. Defaults to None.
+            show (bool, optional): If True, the plot will be displayed. Defaults to True.
+            variables (str, optional): The variables to include in the correlation matrix. Can be 'features', 'labels', or 'all'. Defaults to 'features'.
+
+        Raises:
+            ValueError: If the percentage is not between 0 and 100, or if the method is not one of 'pearson', 'kendall', 'spearman'.
+            TypeError: If variables is not a string.
+
+        Returns:
+            None
+        """
+            # function implementation...
         # View correlations using a percentage of the data
         subset_size = int((percentage / 100) * len(self.data))
         if variables == 'features':
