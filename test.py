@@ -1,5 +1,6 @@
 from StellatorsDataSet import StellatorsDataSet
 import numpy as np
+from qsc import Qsc
 
 
 # -----------------------------------------------------------------------------
@@ -20,7 +21,7 @@ print(f'Number of labels: {dataset.labels.shape[1]}')
 
 # dataset.view_correlations(percentage=100, show=True, method='spearman', variables='features')
 # dataset.view_correlations(percentage=100, show=True, method='pearson', variables='features')
-dataset.view_correlations(percentage=100, show=True, method='kendall', variables='features')
+# dataset.view_correlations(percentage=100, show=True, method='kendall', variables='features')
 
 # -----------------------------------------------------------------------------
 # Count the number of samples respecting the restrictions and return a new StellatorsDataSet object with the restricted data
@@ -43,6 +44,9 @@ dataset_with_restrictions.view_distributions(percentage=100, variables=['nfp', '
 
 # -----------------------------------------------------------------------------
 print(dataset_with_restrictions.labels)
+
+for stel in dataset_with_restrictions:
+    stel.plot_boundary()
 
 
 
