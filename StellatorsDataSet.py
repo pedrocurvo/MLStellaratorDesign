@@ -70,7 +70,8 @@ class StellatorsDataSet(Dataset):
                             'B2c' : 8,
                             'p2' : 9}
         
-    
+    #------------------------------------------------------------------------------
+    # Essential for DataLoader to work
     def __len__(self):
         return len(self.data)
 
