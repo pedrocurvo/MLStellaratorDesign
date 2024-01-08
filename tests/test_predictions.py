@@ -25,7 +25,7 @@ with torch.inference_mode():
 
     p2 = loaded_model_preds[0][9].item()
 
-    stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order=order)
+    stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order='r2')
     iota  = stel.iota
     max_elongation = stel.max_elongation
     min_L_grad_B   = stel.min_L_grad_B
