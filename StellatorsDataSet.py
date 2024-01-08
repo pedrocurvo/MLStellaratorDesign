@@ -24,7 +24,7 @@ class StellatorsDataSet(Dataset):
         # If sample_size is specified, only use the first sample_size rows
         if sample_size:
             self.data = self.data[:sample_size, :]
-        
+
         self.transform = transform
         self.normalization = normalization
         self.features = self.data[:, 10:]
@@ -80,7 +80,6 @@ class StellatorsDataSet(Dataset):
         # Returns one sample of the data, data and label (X, y).
         features = torch.tensor(self.data[idx, 10:], dtype=torch.float32)
         labels = torch.tensor(self.data[idx, :10], dtype=torch.float32)
-
         return features, labels
     
     #------------------------------------------------------------------------------
