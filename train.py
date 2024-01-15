@@ -1,5 +1,6 @@
 from torch.utils.data import DataLoader, random_split
 import torch
+from torchvision import transforms
 import os
 from StellatorsDataSet import StellatorsDataSet
 # Measure time
@@ -7,6 +8,7 @@ from timeit import default_timer as timer
 import torch.nn as nn
 from train_pipeline import engine, model_builder, utils
 
+# Important for num_workers > 0
 if __name__ == "__main__":
     # Dataset
     # Load the data
@@ -26,19 +28,17 @@ if __name__ == "__main__":
     # Setup device-agnostic code 
     if torch.cuda.is_available():
         device = "cuda" # NVIDIA GPU
-    # elif torch.backends.mps.is_available():
-    #     device = "mps" # Apple GPU
+    elif torch.backends.mps.is_available():
+        device = "mps" # Apple GPU
     else:
         device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
     print(f"Using device: {device}")
 
-    print(f"Device: {device}")
-
     # Setup the Hyperparameters
-    BATCH_SIZE = len(full_dataset)
-    NUM_EPOCHS = 200000
-    LEARING_RATE = 0.001
+    BATCH_SIZE = len(full_dataset) // 10
+    NUM_EPOCHS = 10
+    LEARING_RATE = 0.01
 
     # Define sizes for train, validation, and test sets
     train_size = int(0.5 * len(full_dataset))
@@ -48,7 +48,30 @@ if __name__ == "__main__":
     # Split the dataset
     train_dataset, val_dataset, test_dataset = random_split(full_dataset, [train_size, val_size, test_size])
 
+    # Normalize the data
+    train_dataset.transform = transforms.Compose([
+        transforms.ToTensor(),
+    ])
 
+    avg_features = torch.mean(train_dataset[:][0], dim=0)
+    std_features = torch.std(train_dataset[:][0], dim=0)
+
+    print(f'avg: {avg_features}')
+    print(f'std: {std_features}')
+
+    # Normalize the data
+    # Normalize everything with the average and standard deviation of the training set
+    # This is important to avoid data leakage
+    train_dataset.transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(avg_features, std_features)
+    ])
+
+    test_dataset.transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(avg_features, std_features)
+    ])
+    
 
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
@@ -60,7 +83,9 @@ if __name__ == "__main__":
 
     test_loader = DataLoader(dataset=test_dataset,
                             batch_size=BATCH_SIZE,
-                            shuffle=False
+                            shuffle=False,
+                            num_workers=4,
+                            pin_memory=True
     )
 
     # Create the model from the model_builder.py
