@@ -29,8 +29,16 @@ class StellatorsDataSet(Dataset):
         self.normalization = normalization
         self.features = self.data[:, 10:]
         self.labels = self.data[:, :10]
+        # ---------------------------------------------------------------------
+        # The Atrributes below are used for normalization
+        # ---------------------------------------------------------------------
+        # Mean and standard deviation of the data
         self.mean = None
         self.std = None
+        # Min and max of the data
+        self.min = None
+        self.max = None
+
         # Dictionary of features and labels
         # Maps the feature/label name to the index in the data array
         self.data_dict = {'rc1' : 0,
@@ -84,6 +92,7 @@ class StellatorsDataSet(Dataset):
         labels = torch.tensor(self.data[idx, :10], dtype=torch.float32)
         if self.transform:
             features = self.transform(features, self.mean, self.std)
+            # features = self.transform(features, self.min, self.max)
         return features, labels
     
     #------------------------------------------------------------------------------
