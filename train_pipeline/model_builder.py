@@ -20,6 +20,14 @@ class Model(nn.Module):
             nn.LeakyReLU(),
             nn.Dropout(0.3),
 
+            nn.Linear(64, 128),
+            nn.LeakyReLU(),
+            nn.Linear(128, 128),
+            nn.LeakyReLU(),
+            nn.Linear(128, 64),
+            nn.LeakyReLU(),
+
+
             nn.Linear(64, output_dim)
         )
     
