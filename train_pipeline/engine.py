@@ -26,10 +26,15 @@ def train_step(model: torch.nn.Module,
     device: A target device to compute on (e.g. "cuda" or "cpu").
 
     Returns:
-    A tuple of training loss and training accuracy metrics.
-    In the form (train_loss, train_accuracy). For example:
+    If classification is True, a tuple of testing loss and testing accuracy metrics.
+    In the form (test_loss, test_accuracy). For example:
 
-    (0.1112, 0.8743)
+    (0.0223, 0.8985)
+
+    If classification is False, a single testing loss metric.
+    In the form (test_loss). For example:
+
+    (0.0223)
     """
     # Put model in train mode
     model.train()
@@ -86,12 +91,19 @@ def test_step(model: torch.nn.Module,
     dataloader: A DataLoader instance for the model to be tested on.
     loss_fn: A PyTorch loss function to calculate loss on the test data.
     device: A target device to compute on (e.g. "cuda" or "cpu").
+    classification: A boolean indicating whether the model is a classification
+    or regression model.
 
     Returns:
-    A tuple of testing loss and testing accuracy metrics.
+    If classification is True, a tuple of testing loss and testing accuracy metrics.
     In the form (test_loss, test_accuracy). For example:
 
     (0.0223, 0.8985)
+
+    If classification is False, a single testing loss metric.
+    In the form (test_loss). For example:
+
+    (0.0223)
     """
     # Put model in eval mode
     model.eval() 
