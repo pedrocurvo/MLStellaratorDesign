@@ -3,7 +3,7 @@ Contains functionality for creating PyTorch DataLoaders for
 the Stellators dataset.
 """
 import os
-
+import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
@@ -24,16 +24,37 @@ def create_dataloaders(
     # Split the dataset
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
+    # Normalize the data
     # Get the mean and standard deviation of the training dataset
+    # We use the mean and standard deviation of the training dataset
+    # to normalize the test dataset as well to avoid data leakage
     mean = 0
     std = 0
     for X, y in train_dataset:
         mean += X
-        std += X.std()
+    for X, y in train_dataset:
+        std += (X - mean) ** 2
     mean /= len(train_dataset)
     std /= len(train_dataset)
+    std = torch.sqrt(std)
     print(f"Mean: {mean}")
     print(f"Std: {std}")
+
+    # Find Max and Min values
+    max = torch.zeros(mean.shape)
+    min = torch.zeros(mean.shape)
+    for X, y in train_dataset:
+        max += X
+        min += X
+        break
+    for X, y in train_dataset:
+        for i in range(len(mean)):
+            if X[i] > max[i]:
+                max[i] = X[i]
+            if X[i] < min[i]:
+                min[i] = X[i]
+    print(f"Max: {max}")
+    print(f"Min: {min}")
 
     for X, y in train_dataset:
         print(X)
@@ -41,10 +62,16 @@ def create_dataloaders(
 
     def try_norm(X, mean, std):
         return (X - mean) / std
+    def try_scaler(X, max, min):
+        return (X - min) / (max - min)
     train_dataset.dataset.mean = mean
     train_dataset.dataset.std = std
+    train_dataset.dataset.max = max
+    train_dataset.dataset.min = min
     test_dataset.dataset.mean = mean
     test_dataset.dataset.std = std
+    test_dataset.dataset.max = max
+    test_dataset.dataset.min = min
 
     # Preprocess the data
     train_dataset.dataset.transform = try_norm
