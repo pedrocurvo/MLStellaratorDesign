@@ -10,15 +10,10 @@ class Model(nn.Module):
         super().__init__()
         self.layers = nn.Sequential(
             nn.BatchNorm1d(input_dim),
-            nn.Linear(input_dim, 256),
-            nn.BatchNorm1d(256),
-            nn.LeakyReLU(),
-            nn.Dropout(0.5),
-
-            nn.Linear(256, 128),
+            nn.Linear(input_dim, 128),
             nn.BatchNorm1d(128),
             nn.LeakyReLU(),
-            nn.Dropout(0.4),
+            nn.Dropout(0.5),
 
             nn.Linear(128, 64),
             nn.BatchNorm1d(64),
