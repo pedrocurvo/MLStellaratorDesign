@@ -31,8 +31,10 @@ if __name__ == "__main__":
 
     # Setup the Hyperparameters
     BATCH_SIZE = 64
-    NUM_EPOCHS = 10
-    LEARING_RATE = 0.1
+    NUM_EPOCHS = 100
+    LEARING_RATE = 0.01
+    WEIGHT_DECAY = 0
+    MOMENTUM = 0
 
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
@@ -49,7 +51,9 @@ if __name__ == "__main__":
     # Set up loss function and optimizer
     loss_fn = nn.L1Loss()
     optimizer = torch.optim.Adam(model.parameters(),
-                                lr=LEARING_RATE)
+                                lr=LEARING_RATE,
+                                weight_decay=WEIGHT_DECAY
+    )
 
     # Set the seed and start the timer 
     train_time_start_on_gpu = timer()
