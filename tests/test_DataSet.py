@@ -17,7 +17,7 @@ from StellatorsDataSet import StellatorsDataSet
 
 # -----------------------------------------------------------------------------
 # Load the dataset
-dataset = StellatorsDataSet('../data/dataset.npy')  
+dataset = StellatorsDataSet('data/dataset.npy')  
 print(f'Number of samples: {len(dataset)}')
 print(f'Number of features: {dataset.features.shape[1]}')
 print(f'Number of labels: {dataset.labels.shape[1]}')
@@ -49,7 +49,7 @@ dataset_with_restrictions = dataset.calculate_data_counts(IOTA_MIN = 0.2,
                               MIN_DMERC_TIMES_R2 = 0,
                               return_object=True)
 
-dataset_with_restrictions.view_correlations(method='spearman', variables='features', show=True)
+dataset_with_restrictions.view_correlations(method='spearman', variables='all', show=True)
 
 # -----------------------------------------------------------------------------
 # View the distributions of the dataset with restrictions applied
