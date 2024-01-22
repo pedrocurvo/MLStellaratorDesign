@@ -13,10 +13,25 @@ NUM_WORKERS = 0
 
 def create_dataloaders(
     dataset: Dataset,
-    train_size: int,
+    train_size: float,
     batch_size: int, 
     num_workers: int=NUM_WORKERS
 ):
+    """
+    Create train and test data loaders for a given dataset.
+
+    Args:
+        dataset (Dataset): The dataset to be split into train and test sets.
+        train_size (float): The proportion of the dataset to be used for training. It should be a float between 0 and 1.
+        batch_size (int): The number of samples per batch.
+        num_workers (int, optional): The number of subprocesses to use for data loading. Defaults to NUM_WORKERS.
+
+    Returns:
+        train_loader (DataLoader): The data loader for the training set.
+        test_loader (DataLoader): The data loader for the test set.
+    """
+    if train_size < 0 or train_size > 1:
+        raise ValueError("train_size must be a float between 0 and 1.")
     # Define sizes for train and test datasets
     train_size = int(train_size * len(dataset))
     test_size = len(dataset) - train_size
