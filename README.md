@@ -1,3 +1,80 @@
 # Machine Learning for Stellarator Design
 
 The design of fusion reactors with a stellarator configuration can be enormously simplified using a framework called the near-axis expansion. A Python code that leverages such simplification has been developed that is now routinely used to design new machines. From a set of input parameters, the code produces a new design, which can be assessed in terms of its characteristics, such as confinement and complexity of the geometry. However, to achieve a design with certain characteristics, one must find the appropriate input parameters. The goal of this work is to use machine learning, e.g. a neural network, to map the desired characteristics of the device to the corresponding parameters required to generate the device. This includes the development of a dataset of configurations and the training of the neural network on such dataset.
+
+## Project Architecture
+The project is structured as follows:
+
+```
+.
+├── data
+│   ├── dataset.csv
+│   └── dataset.npy
+├── models
+├── train_pipeline
+│   ├── data_setup.py
+│   ├── engine.py
+│   ├── model_builder.py
+│   ├── utils.py
+│   └── predictions.py
+├── train.py
+├── CSVtoNumpyConverter.py
+├── StellatorsDataSet.py
+├── generate.py
+├── resources 
+├── requirements.txt
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+```data```: Directory containing the data set used for training and testing.
+
+*  ```dataset.csv```: CSV file containing the dataset.
+*  ```dataset.npy```: Numpy file containing the dataset.
+    
+```models```: Directory containing the dictionaries of the trained models, the models are resgistred with the date and time of the training.
+
+```train_pipeline```: Directory containing the modules used to train the model.
+
+ *   ```data_setup.py```: Module used to load the dataset and split it into training and testing sets, returning the data loaders.
+ *   ```engine.py```: Module containing the training and testing loop functions.
+ *   ```model_builder.py```: Module containg several model classes and model architecture.
+ *   ```utils.py```: Module containing utility functions such as the function used to save the models,
+ *   ```predictions.py```: Module used to generate predictions and evaluate models.
+
+```train.py```: Entry point of the training pipeline, it is used to train the model and save it. Here the hyperparameters of the model can be set, such as the number of epochs, the learning rate, the batch size, loss fuction, optimizer, etc.
+
+```StellatorsDataSet.py```: Class used to load the dataset.
+
+```CSVtoNumpyConverter.py```: Script used to convert the dataset from CSV to Numpy format to be used by StellatorsDataSet class.
+
+```generate.py```: Generator of stellarators, using the pyQSC package. It is used to generate the dataset.
+
+```resources```: Directory containing resources such as papers, presentations, etc.. to give a theoretical background to the project.
+
+```requirements.txt```: List of packages required to run the code.
+
+```.gitignore```: List of files that should not be uploaded to the repository.
+
+```LICENSE```: License of the project.
+
+```README.md```: Description of the project.
+
+
+
+## How to run the code
+
+To run the code you need to install the packages listed in the requirements.txt file. You can do this by running the following command in the terminal:
+
+```
+pip install -r requirements.txt
+```
+
+Then you can change the hyperparameters of the model in the ```train.py``` file and choose a model from the ```model_builder.py``` file.
+Then you can run the code by running the following command in the terminal:
+
+```
+python3 train.py
+```
+Your model will be saved in the ```models``` directory with the date and time of the training.
