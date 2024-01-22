@@ -34,10 +34,14 @@ class StellatorsDataSet(Dataset):
         # ---------------------------------------------------------------------
         # Mean and standard deviation of the data
         self.mean = None
+        self.mean_labels = None
         self.std = None
+        self.std_labels = None
         # Min and max of the data
         self.min = None
+        self.min_labels = None
         self.max = None
+        self.max_labels = None
 
         # Dictionary of features and labels
         # Maps the feature/label name to the index in the data array
@@ -92,7 +96,7 @@ class StellatorsDataSet(Dataset):
         labels = torch.tensor(self.data[idx, :10], dtype=torch.float32)
         if self.transform:
             features = self.transform(features, self.mean, self.std)
-            # features = self.transform(features, self.min, self.max)
+            labels = self.transform(labels, self.mean_labels, self.std_labels)
         return features, labels
     
     #------------------------------------------------------------------------------

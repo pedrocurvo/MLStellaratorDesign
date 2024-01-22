@@ -8,6 +8,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
 from StellatorsDataSet import StellatorsDataSet
+from .utils import norm
 
 NUM_WORKERS = 0
 
@@ -43,61 +44,38 @@ def create_dataloaders(
     # Get the mean and standard deviation of the training dataset
     # We use the mean and standard deviation of the training dataset
     # to normalize the test dataset as well to avoid data leakage
-    mean = 0
-    std = 0
-    for X, y in train_dataset:
-        mean += X
-    for X, y in train_dataset:
-        std += (X - mean) ** 2
-    mean /= len(train_dataset)
-    std /= len(train_dataset)
-    std = torch.sqrt(std)
-    print(f"Mean: {mean}")
-    print(f"Std: {std}")
+    mean = torch.mean(torch.tensor(train_dataset.dataset.features), dim=0, dtype=torch.float32)
+    mean_labels = torch.mean(torch.tensor(train_dataset.dataset.labels), dim=0, dtype=torch.float32)
+    std = torch.std(torch.tensor(train_dataset.dataset.features), dim=0).float()
+    std_labels = torch.std(torch.tensor(train_dataset.dataset.labels), dim=0).float()
 
     # Find Max and Min values
-    max = torch.zeros(mean.shape)
-    min = torch.zeros(mean.shape)
-    for X, y in train_dataset:
-        max += X
-        min += X
-        break
-    for X, y in train_dataset:
-        for i in range(len(mean)):
-            if X[i] > max[i]:
-                max[i] = X[i]
-            if X[i] < min[i]:
-                min[i] = X[i]
-    print(f"Max: {max}")
-    print(f"Min: {min}")
+    max = torch.max(torch.tensor(train_dataset.dataset.features), dim=0).values.float()
+    max_labels = torch.max(torch.tensor(train_dataset.dataset.labels), dim=0).values.float()
+    min = torch.min(torch.tensor(train_dataset.dataset.features), dim=0).values.float()
+    min_labels = torch.min(torch.tensor(train_dataset.dataset.labels), dim=0).values.float()
 
-    for X, y in train_dataset:
-        print(X)
-        break
-
-    def try_norm(X, mean, std):
-        return (X - mean) / std
-    def try_scaler(X, max, min):
-        return (X - min) / (max - min)
     train_dataset.dataset.mean = mean
+    train_dataset.dataset.mean_labels = mean_labels
     train_dataset.dataset.std = std
+    train_dataset.dataset.std_labels = std_labels
     train_dataset.dataset.max = max
+    train_dataset.dataset.max_labels = max_labels
     train_dataset.dataset.min = min
+    train_dataset.dataset.min_labels = min_labels
     test_dataset.dataset.mean = mean
+    test_dataset.dataset.mean_labels = mean_labels
     test_dataset.dataset.std = std
+    test_dataset.dataset.std_labels = std_labels
     test_dataset.dataset.max = max
+    test_dataset.dataset.max_labels = max
     test_dataset.dataset.min = min
+    test_dataset.dataset.min_labels = min
 
     # Preprocess the data
-    train_dataset.dataset.transform = try_norm
-    test_dataset.dataset.transform = try_norm
+    train_dataset.dataset.transform = norm
+    test_dataset.dataset.transform = norm
 
-    for X, y in train_dataset:
-        print(X)
-        break
-
-
-    
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
                             batch_size=batch_size, # samples per batch

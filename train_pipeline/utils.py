@@ -86,3 +86,6 @@ def eval_model(model: torch.nn.Module,
     return {"model_name": model.__class__.__name__, # only works when model was created with a class
             "model_loss": loss.item(),
             "model_acc": acc}
+
+def norm(X, mean, std):
+    return (X - mean) / std
