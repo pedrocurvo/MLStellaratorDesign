@@ -6,12 +6,14 @@ import torch
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 
-def train_step(model: torch.nn.Module, 
+def train_step(epoch: int,
+               model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
                loss_fn: torch.nn.Module, 
                optimizer: torch.optim.Optimizer,
                device: torch.device,
-               classification: bool = True) -> Tuple[float, float]:
+               classification: bool = True,
+               disable_progress_bar: bool = False) -> Tuple[float, float]:
     """Trains a PyTorch model for a single epoch.
 
     Turns a target PyTorch model to training mode and then
@@ -42,8 +44,16 @@ def train_step(model: torch.nn.Module,
     # Setup train loss and train accuracy values
     train_loss, train_acc = 0, 0
 
+     # Loop through data loader data batches
+    progress_bar = tqdm(
+        enumerate(dataloader), 
+        desc=f"Training Epoch {epoch + 1}", 
+        total=len(dataloader),
+        disable=disable_progress_bar
+    )
+
     # Loop through data loader data batches
-    for batch, (X, y) in enumerate(dataloader):
+    for batch, (X, y) in progress_bar:
         # Send data to target device
         X, y = X.to(device), y.to(device)
 
@@ -67,6 +77,12 @@ def train_step(model: torch.nn.Module,
         if classification:
             y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
             train_acc += (y_pred_class == y).sum().item()/len(y_pred)
+        # Update progress bar
+        progress_bar.set_postfix(
+            {
+                "train_loss": train_loss / (batch + 1),
+            }
+        )
 
     # Adjust metrics to get average loss and accuracy per batch 
     train_loss = train_loss / len(dataloader)
@@ -76,11 +92,13 @@ def train_step(model: torch.nn.Module,
     else:
         return train_loss
 
-def test_step(model: torch.nn.Module, 
+def test_step(epoch: int,
+              model: torch.nn.Module, 
               dataloader: torch.utils.data.DataLoader, 
               loss_fn: torch.nn.Module,
               device: torch.device,
-              classification: bool = False) -> Tuple[float, float]:
+              classification: bool = False,
+              disable_progress_bar: bool = False) -> Tuple[float, float]:
     """Tests a PyTorch model for a single epoch.
 
     Turns a target PyTorch model to "eval" mode and then performs
@@ -111,10 +129,18 @@ def test_step(model: torch.nn.Module,
     # Setup test loss and test accuracy values
     test_loss, test_acc = 0, 0
 
+    # Loop through data loader data batches
+    progress_bar = tqdm(
+        enumerate(dataloader), 
+        desc=f"Testing Epoch {epoch + 1}", 
+        total=len(dataloader),
+        disable=disable_progress_bar
+    )
+
     # Turn on inference context manager
     with torch.inference_mode():
         # Loop through DataLoader batches
-        for batch, (X, y) in enumerate(dataloader):
+        for batch, (X, y) in progress_bar:
             # Send data to target device
             X, y = X.to(device), y.to(device)
 
@@ -129,6 +155,13 @@ def test_step(model: torch.nn.Module,
             if classification:
                 test_pred_labels = test_pred_logits.argmax(dim=1)
                 test_acc += ((test_pred_labels == y).sum().item()/len(test_pred_labels))
+            
+            # Update progress bar
+            progress_bar.set_postfix(
+                {
+                  "test_loss": test_loss / (batch + 1),
+                }
+            )
 
     # Adjust metrics to get average loss and accuracy per batch 
     test_loss = test_loss / len(dataloader)
@@ -145,7 +178,8 @@ def train(model: torch.nn.Module,
           loss_fn: torch.nn.Module,
           epochs: int,
           device: torch.device,
-          classification: bool = True) -> Dict[str, List]:
+          classification: bool = True, 
+          disable_progress_bar: bool = False) -> Dict[str, List]:
     """Trains and tests a PyTorch model.
 
     Passes a target PyTorch models through train_step() and test_step()
@@ -188,7 +222,7 @@ def train(model: torch.nn.Module,
     model.to(device)
 
     # Loop through training and testing steps for a number of epochs
-    for epoch in tqdm(range(epochs)):
+    for epoch in tqdm(range(epochs), disable=disable_progress_bar):
         try:
             train_loss, train_acc = 0, 0
             test_loss, test_acc = 0, 0
@@ -197,17 +231,21 @@ def train(model: torch.nn.Module,
                 test_metrics = test_loss, test_acc
             else:
                 train_metrics = train_loss 
-            train_metrics = train_step(model=model,
+            train_metrics = train_step(epoch=epoch,
+                                            model=model,
                                             dataloader=train_dataloader,
                                             loss_fn=loss_fn,
                                             optimizer=optimizer,
                                             device=device,
-                                            classification=classification)
-            test_metrics = test_step(model=model,
+                                            classification=classification,
+                                            disable_progress_bar=True)
+            test_metrics = test_step(epoch=epoch,
+                                            model=model,
                                             dataloader=test_dataloader,
                                             loss_fn=loss_fn,
                                             device=device,
-                                            classification=classification)
+                                            classification=classification,
+                                            disable_progress_bar=True)
 
             # Print depending on classification or regression
             if classification:
@@ -215,7 +253,7 @@ def train(model: torch.nn.Module,
                 test_loss, test_acc = test_metrics
                 # Print out what's happening
                 print(
-                f"Epoch: {epoch+1} | "
+                f"\nEpoch: {epoch+1} | "
                 f"train_loss: {train_loss:.4f} | "
                 f"train_acc: {train_acc:.4f} | "
                 f"test_loss: {test_loss:.4f} | "
@@ -233,7 +271,7 @@ def train(model: torch.nn.Module,
                 test_loss = test_metrics
                 # Print out what's happening
                 print(
-                f"Epoch: {epoch+1} | "
+                f"\nEpoch: {epoch+1} | "
                 f"train_loss: {train_loss:.4f} | "
                 f"test_loss: {test_loss:.4f}"
                 )
