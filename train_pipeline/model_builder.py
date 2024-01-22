@@ -22,13 +22,11 @@ class Model(nn.Module):
 
             nn.Linear(64, 128),
             nn.LeakyReLU(),
-            nn.Linear(128, 128),
-            nn.LeakyReLU(),
             nn.Linear(128, 64),
             nn.LeakyReLU(),
-
-
-            nn.Linear(64, output_dim)
+            nn.Linear(64, 32),
+            nn.LeakyReLU(),
+            nn.Linear(32, output_dim)
         )
     
     def forward(self, x):
