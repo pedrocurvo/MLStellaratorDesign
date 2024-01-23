@@ -101,3 +101,6 @@ The project is structured as follows:
 
 7. A link will be provided in the terminal, which you can copy and paste in your browser to visualize the tensorboard log. 
 ```TensorBoard 2.15.1 at http://localhost:6007/ (Press CTRL+C to quit)```. In the tensorboard log you can visualize the train and test losses, accuracy if it is a classification problem, and other metrics... You can also visualize the model architecture and so on...
+
+8. Alternatively, if you are using VSCode, you can install the TensorBoard extension and visualize the tensorboard log directly in VSCode by
+pressing ```Cmd+Shift+P``` and typing ```Python: Launch TensorBoard ``` and selecting the dir or log you want to visualize.
