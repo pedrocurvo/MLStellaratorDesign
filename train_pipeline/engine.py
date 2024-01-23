@@ -22,11 +22,15 @@ def train_step(epoch: int,
     pass, loss calculation, optimizer step).
 
     Args:
+    epoch: An integer indicating the current epoch.
     model: A PyTorch model to be trained.
     dataloader: A DataLoader instance for the model to be trained on.
     loss_fn: A PyTorch loss function to minimize.
     optimizer: A PyTorch optimizer to help minimize the loss function.
     device: A target device to compute on (e.g. "cuda" or "cpu").
+    classification: A boolean indicating whether the model is a classification
+    or regression model.
+    disable_progress_bar: A boolean indicating whether to disable the progress bar.
 
     Returns:
     If classification is True, a tuple of testing loss and testing accuracy metrics.
@@ -109,12 +113,14 @@ def test_step(epoch: int,
     a forward pass on a testing dataset.
 
     Args:
+    epoch: An integer indicating the current epoch.
     model: A PyTorch model to be tested.
     dataloader: A DataLoader instance for the model to be tested on.
     loss_fn: A PyTorch loss function to calculate loss on the test data.
     device: A target device to compute on (e.g. "cuda" or "cpu").
     classification: A boolean indicating whether the model is a classification
     or regression model.
+    disable_progress_bar: A boolean indicating whether to disable the progress bar.
 
     Returns:
     If classification is True, a tuple of testing loss and testing accuracy metrics.
@@ -204,6 +210,10 @@ def train(model: torch.nn.Module,
     loss_fn: A PyTorch loss function to calculate loss on both datasets.
     epochs: An integer indicating how many epochs to train for.
     device: A target device to compute on (e.g. "cuda" or "cpu").
+    writer: A SummaryWriter instance to write loss and accuracy metrics to TensorBoard.
+    classification: A boolean indicating whether the model is a classification
+    or regression model.
+    disable_progress_bar: A boolean indicating whether to disable the progress bar.
 
     Returns:
     A dictionary of training and testing loss as well as training and

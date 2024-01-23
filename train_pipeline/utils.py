@@ -89,6 +89,16 @@ def eval_model(model: torch.nn.Module,
             "model_acc": acc}
 
 def norm(X, mean, std):
+    """Normalizes a tensor X with mean and std.
+
+    Args:
+        X (torch.Tensor): A tensor to normalize.
+        mean (torch.Tensor): The mean of X.
+        std (torch.Tensor): The standard deviation of X.
+
+    Returns:
+        torch.Tensor: A normalized tensor X.
+    """
     return (X - mean) / std
 
 def create_writer(experiment_name: str, 
