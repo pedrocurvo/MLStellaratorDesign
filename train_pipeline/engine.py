@@ -45,12 +45,14 @@ def train_step(epoch: int,
     # Setup train loss and train accuracy values
     train_loss, train_acc = 0, 0
 
-     # Loop through data loader data batches
+    # Loop through data loader data batches
     progress_bar = tqdm(
         enumerate(dataloader), 
         desc=f"Training Epoch {epoch + 1}", 
         total=len(dataloader),
-        disable=disable_progress_bar
+        leave=False,
+        disable=disable_progress_bar,
+        colour="green"
     )
 
     # Loop through data loader data batches
@@ -84,6 +86,7 @@ def train_step(epoch: int,
                 "train_loss": train_loss / (batch + 1),
             }
         )
+        progress_bar.update()
 
     # Adjust metrics to get average loss and accuracy per batch 
     train_loss = train_loss / len(dataloader)
@@ -135,7 +138,9 @@ def test_step(epoch: int,
         enumerate(dataloader), 
         desc=f"Testing Epoch {epoch + 1}", 
         total=len(dataloader),
-        disable=disable_progress_bar
+        disable=disable_progress_bar,
+        leave=False,
+        colour="red"
     )
 
     # Turn on inference context manager
@@ -163,6 +168,7 @@ def test_step(epoch: int,
                   "test_loss": test_loss / (batch + 1),
                 }
             )
+            progress_bar.update()
 
     # Adjust metrics to get average loss and accuracy per batch 
     test_loss = test_loss / len(dataloader)
@@ -224,7 +230,18 @@ def train(model: torch.nn.Module,
     model.to(device)
 
     # Loop through training and testing steps for a number of epochs
-    for epoch in tqdm(range(epochs), disable=disable_progress_bar):
+    progress_bar = tqdm(
+        range(epochs),
+        desc="Epochs",
+        total=epochs,
+        disable=disable_progress_bar,
+        leave=False,
+        colour="blue"
+    )
+
+    # Loop through training and testing steps for a number of epochs
+    for epoch in progress_bar:
+        progress_bar.set_description(f"Epoch {epoch+1}")
         try:
             train_loss, train_acc = 0, 0
             test_loss, test_acc = 0, 0
@@ -240,14 +257,14 @@ def train(model: torch.nn.Module,
                                             optimizer=optimizer,
                                             device=device,
                                             classification=classification,
-                                            disable_progress_bar=True)
+                                            disable_progress_bar=False)
             test_metrics = test_step(epoch=epoch,
                                             model=model,
                                             dataloader=test_dataloader,
                                             loss_fn=loss_fn,
                                             device=device,
                                             classification=classification,
-                                            disable_progress_bar=True)
+                                            disable_progress_bar=False)
 
             # Print depending on classification or regression
             if classification:
@@ -273,8 +290,7 @@ def train(model: torch.nn.Module,
                 test_loss = test_metrics
                 # Print out what's happening
                 print(
-                f"\nEpoch: {epoch+1} | "
-                f"train_loss: {train_loss:.4f} | "
+                f"\ntrain_loss: {train_loss:.4f} | "
                 f"test_loss: {test_loss:.4f}"
                 )
 
