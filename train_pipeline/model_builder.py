@@ -9,24 +9,13 @@ class Model(nn.Module):
     def __init__(self, input_dim, output_dim):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.BatchNorm1d(input_dim),
             nn.Linear(input_dim, 128),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU(),
-            nn.Dropout(0.5),
-
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
             nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.LeakyReLU(),
-            nn.Dropout(0.3),
-
-            nn.Linear(64, 128),
-            nn.LeakyReLU(),
-            nn.Linear(128, 64),
-            nn.LeakyReLU(),
-            nn.Linear(64, 32),
-            nn.LeakyReLU(),
-            nn.Linear(32, output_dim)
+            nn.ReLU(),
+            nn.Linear(64, output_dim)
         )
     
     def forward(self, x):
@@ -39,6 +28,8 @@ class MixedNetwork(nn.Module):
         # Shared layers
         self.shared_layers = nn.Sequential(
             nn.Linear(9, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU()
