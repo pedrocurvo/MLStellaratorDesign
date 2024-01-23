@@ -8,6 +8,7 @@ from timeit import default_timer as timer
 from datetime import datetime
 import torch.nn as nn
 from train_pipeline import engine, model_builder, utils, data_setup
+from torchsummary import summary
 
 # Important for num_workers > 0
 if __name__ == "__main__":
@@ -17,7 +18,7 @@ if __name__ == "__main__":
 
     # Dataset
     # Load the data
-    full_dataset = StellatorsDataSet(npy_file='data/dataset.npy', sample_size=90000)
+    full_dataset = StellatorsDataSet(npy_file='data/dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -31,16 +32,18 @@ if __name__ == "__main__":
 
     # Setup the Hyperparameters
     BATCH_SIZE = 64
-    NUM_EPOCHS = 100
+    NUM_EPOCHS = 10
     LEARING_RATE = 0.01
     WEIGHT_DECAY = 0
     MOMENTUM = 0
+    NUM_OF_WORKERS = 0
 
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
     train_dataloader, test_dataloader = data_setup.create_dataloaders(dataset=full_dataset,
                                                                     train_size=0.7,
-                                                                    batch_size=BATCH_SIZE
+                                                                    batch_size=BATCH_SIZE,
+                                                                    num_workers=NUM_OF_WORKERS
 )
 
     # Create the model from the model_builder.py
@@ -55,6 +58,23 @@ if __name__ == "__main__":
                                 weight_decay=WEIGHT_DECAY
     )
 
+    # Create the writer for TensorBoard with help from utils.py
+    writer = utils.create_writer(experiment_name="MLStellaratorDesign",
+                                model_name=model.__class__.__name__,
+    )
+    # Add Model Architecture to TensorBoard
+    writer.add_text("Model Summary", str(model))
+    # Add Hyperparameters to TensorBoard
+    writer.add_hparams({"batch_size": BATCH_SIZE,
+                        "num_epochs": NUM_EPOCHS,
+                        "learning_rate": LEARING_RATE,
+                        "weight_decay": WEIGHT_DECAY,
+                        "momentum": MOMENTUM,
+                        "num_of_workers": NUM_OF_WORKERS
+    }, 
+    {})
+
+
     # Set the seed and start the timer 
     train_time_start_on_gpu = timer()
     print(f"Training on {device}...")
@@ -67,7 +87,8 @@ if __name__ == "__main__":
                 loss_fn=loss_fn,
                 epochs=NUM_EPOCHS,
                 device=device,
-                classification=False)
+                classification=False,
+                writer=writer)
 
 
     # Measure time
@@ -78,5 +99,5 @@ if __name__ == "__main__":
 
     # Save the model with help from utils.py
     utils.save_model(model=model,
-                    target_dir="models",
-                    model_name=f"{model.__class__.__name__}_{current_date}.pth")
+                    target_dir=f"models/{model.__class__.__name__}",
+                    model_name=f"{current_date}.pth")

@@ -5,6 +5,7 @@ import torch
 
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
+from torch.utils.tensorboard import SummaryWriter
 
 def train_step(epoch: int,
                model: torch.nn.Module, 
@@ -178,6 +179,7 @@ def train(model: torch.nn.Module,
           loss_fn: torch.nn.Module,
           epochs: int,
           device: torch.device,
+          writer: torch.utils.tensorboard.writer.SummaryWriter = None,
           classification: bool = True, 
           disable_progress_bar: bool = False) -> Dict[str, List]:
     """Trains and tests a PyTorch model.
@@ -279,6 +281,23 @@ def train(model: torch.nn.Module,
                 # Update results dictionary
                 results["train_loss"].append(train_loss)
                 results["test_loss"].append(test_loss)
+
+            if writer:
+                # Add loss results to SummaryWriter
+                writer.add_scalar("Loss/Train", train_loss, epoch)
+                writer.add_scalar("Loss/Test", test_loss, epoch)
+                if classification:
+                    # Add accuracy results to SummaryWriter
+                    writer.add_scalar("Accuracy/Train", train_acc, epoch)
+                    writer.add_scalar("Accuracy/Test", test_acc, epoch)
+
+                # Track the PyTorch model architecture
+                writer.add_graph(model=model, 
+                            # Pass in an example input
+                            input_to_model=torch.randn(32, 9).to(device))
+
+                # Close the writer
+                writer.close()
         except KeyboardInterrupt:
             print("\nKeyboard interrupt detected.")
             print("Stopping training...")
