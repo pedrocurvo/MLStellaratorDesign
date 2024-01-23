@@ -1,8 +1,16 @@
 # Machine Learning for Stellarator Design
 
+## Table of Contents
+- [Machine Learning for Stellarator Design](#machine-learning-for-stellarator-design)
+  - [Table of Contents](#table-of-contents)
+  - [Project Description](#project-description)
+  - [Project Architecture Overview](#project-architecture-overview)
+  - [How to run the code](#how-to-run-the-code)
+
+## Project Description
 The design of fusion reactors with a stellarator configuration can be enormously simplified using a framework called the near-axis expansion. A Python code that leverages such simplification has been developed that is now routinely used to design new machines. From a set of input parameters, the code produces a new design, which can be assessed in terms of its characteristics, such as confinement and complexity of the geometry. However, to achieve a design with certain characteristics, one must find the appropriate input parameters. The goal of this work is to use machine learning, e.g. a neural network, to map the desired characteristics of the device to the corresponding parameters required to generate the device. This includes the development of a dataset of configurations and the training of the neural network on such dataset.
 
-## Project Architecture
+## Project Architecture Overview
 The project is structured as follows:
 
 ```
@@ -11,6 +19,7 @@ The project is structured as follows:
 │   ├── dataset.csv
 │   └── dataset.npy
 ├── models
+├── runs
 ├── train_pipeline
 │   ├── data_setup.py
 │   ├── engine.py
@@ -34,6 +43,8 @@ The project is structured as follows:
 *  ```dataset.npy```: Numpy file containing the dataset.
     
 ```models```: Directory containing the dictionaries of the trained models, the models are resgistred with the date and time of the training.
+
+```runs```: Directory containing the TensorBoard logs of the training.
 
 ```train_pipeline```: Directory containing the modules used to train the model.
 
@@ -65,16 +76,28 @@ The project is structured as follows:
 
 ## How to run the code
 
-To run the code you need to install the packages listed in the requirements.txt file. You can do this by running the following command in the terminal:
+1. Install required packages using the following command in the terminal:
 
-```
-pip install -r requirements.txt
-```
+    ```
+    pip install -r requirements.txt
+    ```
 
-Then you can change the hyperparameters of the model in the ```train.py``` file and choose a model from the ```model_builder.py``` file.
-Then you can run the code by running the following command in the terminal:
+2. Adjust hyperparameters in ```train.py``` and choose a model from ```model_builder.py```.
 
-```
-python3 train.py
-```
-Your model will be saved in the ```models``` directory with the date and time of the training.
+3. Run the code using the following command in the terminal:
+
+    ```
+    python3 train.py
+    ```
+
+4. Your model will be saved in the ```models/model.__class__.__name__``` directory with the date and time of the training (e.g. ```models/Model/2024_01_22_23_49_10.pth```).
+
+5. A TensorBoard log will be created in the ```runs``` directory(e.g. ```runs/MLStellaratorDesign/Model/2024_01_22_23_49_10```).
+6. To visualize the tensorboard log you can run the following command in the terminal:
+
+    ```
+    tensorboard --logdir=runs
+    ```
+
+7. A link will be provided in the terminal, which you can copy and paste in your browser to visualize the tensorboard log. 
+```TensorBoard 2.15.1 at http://localhost:6007/ (Press CTRL+C to quit)```. In the tensorboard log you can visualize the train and test losses, accuracy if it is a classification problem, and other metrics... You can also visualize the model architecture and so on...
