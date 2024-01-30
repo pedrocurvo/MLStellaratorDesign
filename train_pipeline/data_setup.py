@@ -10,13 +10,12 @@ from torch.utils.data import random_split
 from StellatorsDataSet import StellatorsDataSet
 from .utils import norm
 
-NUM_WORKERS = 0
 
 def create_dataloaders(
     dataset: Dataset,
     train_size: float,
     batch_size: int, 
-    num_workers: int=NUM_WORKERS
+    num_workers: int=0
 ):
     """
     Create train and test data loaders for a given dataset.
