@@ -12,6 +12,9 @@ from torchsummary import summary
 
 # Important for num_workers > 0
 if __name__ == "__main__":
+    # Get the arguments from the command line
+    args = utils.parser()
+
     # Get Current Date and Time to name the model
     now = datetime.now()
     current_date = now.strftime("%Y_%m_%d_%H_%M_%S")
@@ -31,10 +34,10 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     # Setup the Hyperparameters
-    BATCH_SIZE = 64
-    NUM_EPOCHS = 10
-    LEARING_RATE = 0.01
-    WEIGHT_DECAY = 0
+    BATCH_SIZE = args.batch_size
+    NUM_EPOCHS = args.num_epochs
+    LEARING_RATE = args.learning_rate
+    WEIGHT_DECAY = args.weight_decay
     MOMENTUM = 0
     NUM_OF_WORKERS = 0
 
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     ).to(device)
 
     # Set up loss function and optimizer
-    loss_fn = nn.L1Loss()
+    loss_fn = getattr(nn, args.loss_function)()
     optimizer = torch.optim.Adam(model.parameters(),
                                 lr=LEARING_RATE,
                                 weight_decay=WEIGHT_DECAY
@@ -70,7 +73,6 @@ if __name__ == "__main__":
                         "learning_rate": LEARING_RATE,
                         "weight_decay": WEIGHT_DECAY,
                         "momentum": MOMENTUM,
-                        "num_of_workers": NUM_OF_WORKERS
     }, 
     {})
 

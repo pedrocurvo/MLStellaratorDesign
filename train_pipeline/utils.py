@@ -5,6 +5,27 @@ from timeit import default_timer as timer
 import torch
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
+import argparse
+
+def parser():
+    """Parses arguments from the command line.
+
+    Returns:
+        argparse.Namespace: Arguments from the command line.
+    """
+    parser = argparse.ArgumentParser(description="Train a model", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--batch_size", type=int, default=64, help="Batch size")
+    parser.add_argument("--num_epochs", type=int, default=10, help="Number of epochs")
+    parser.add_argument("--learning_rate", type=float, default=0.01, help="Learning rate")
+    parser.add_argument("--weight_decay", type=float, default=0, help="Weight decay")
+    parser.add_argument("--loss_function",
+                        type=str,
+                        default="MSELoss",
+                        choices=["L1Loss", "MSELoss", "HuberLoss", "SmoothL1Loss"],
+                        help="Loss function")
+    args = parser.parse_args()
+    return args
+
 
 def save_model(model: torch.nn.Module,
                target_dir: str,
