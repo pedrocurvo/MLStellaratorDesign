@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
-    train_dataloader, test_dataloader = data_setup.create_dataloaders(dataset=full_dataset,
+    train_dataloader, test_dataloader, mean_std = data_setup.create_dataloaders(dataset=full_dataset,
                                                                     train_size=0.7,
                                                                     batch_size=BATCH_SIZE,
                                                                     num_workers=NUM_OF_WORKERS
@@ -73,6 +73,20 @@ if __name__ == "__main__":
                         "learning_rate": LEARING_RATE,
                         "weight_decay": WEIGHT_DECAY,
                         "momentum": MOMENTUM,
+                        "num_of_workers": NUM_OF_WORKERS,
+                        "loss_function": loss_fn.__class__.__name__,
+                        "optimizer": optimizer.__class__.__name__,
+                        "device": device,
+                        "model": model.__class__.__name__,
+                        "model_architecture": str(model),
+                        "model_parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
+                        "model_trainable_parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
+                        "model_non_trainable_parameters": sum(p.numel() for p in model.parameters() if not p.requires_grad),
+                        "Labels Mean": mean_std["mean_labels"],
+                        "Labels Standard Deviation": mean_std["std_labels"],
+                        "Features Mean": mean_std["mean"],
+                        "Features Standard Deviation": mean_std["std"],
+
     }, 
     {})
 

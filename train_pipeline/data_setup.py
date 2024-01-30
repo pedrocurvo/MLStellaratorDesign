@@ -90,4 +90,7 @@ def create_dataloaders(
                             pin_memory=True
     )
 
-    return train_loader, test_loader
+    # Dictionary containing the mean and standard deviation of the training dataset
+    mean_std = {"mean": mean, "std": std, "mean_labels": mean_labels, "std_labels": std_labels}
+
+    return train_loader, test_loader, mean_std
