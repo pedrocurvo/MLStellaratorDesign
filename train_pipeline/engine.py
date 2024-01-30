@@ -63,7 +63,6 @@ def train_step(epoch: int,
     for batch, (X, y) in progress_bar:
         # Send data to target device
         X, y = X.to(device), y.to(device)
-
         # 1. Forward pass
         y_pred = model(X)
 
@@ -84,6 +83,12 @@ def train_step(epoch: int,
         if classification:
             y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
             train_acc += (y_pred_class == y).sum().item()/len(y_pred)
+            progress_bar.set_postfix(
+                {
+                    "train_loss": train_loss / (batch + 1),
+                    "train_acc": train_acc / (batch + 1),
+                }
+            )
         # Update progress bar
         progress_bar.set_postfix(
             {
