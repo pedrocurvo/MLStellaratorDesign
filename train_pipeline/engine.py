@@ -33,12 +33,12 @@ def train_step(epoch: int,
     disable_progress_bar: A boolean indicating whether to disable the progress bar.
 
     Returns:
-    If classification is True, a tuple of testing loss and testing accuracy metrics.
+    If classification is True, a tuple of train loss and train accuracy metrics.
     In the form (test_loss, test_accuracy). For example:
 
     (0.0223, 0.8985)
 
-    If classification is False, a single testing loss metric.
+    If classification is False, a single train loss metric.
     In the form (test_loss). For example:
 
     (0.0223)
@@ -128,13 +128,13 @@ def test_step(epoch: int,
     disable_progress_bar: A boolean indicating whether to disable the progress bar.
 
     Returns:
-    If classification is True, a tuple of testing loss and testing accuracy metrics.
-    In the form (test_loss, test_accuracy). For example:
+    If classification is True, a tuple of validation loss and validation accuracy metrics.
+    In the form (val_loss, val_accuracy). For example:
 
     (0.0223, 0.8985)
 
     If classification is False, a single testing loss metric.
-    In the form (test_loss). For example:
+    In the form (val_loss). For example:
 
     (0.0223)
     """
@@ -142,7 +142,7 @@ def test_step(epoch: int,
     model.eval() 
 
     # Setup test loss and test accuracy values
-    test_loss, test_acc = 0, 0
+    val_loss, val_acc = 0, 0
 
     # Loop through data loader data batches
     progress_bar = tqdm(
@@ -166,32 +166,32 @@ def test_step(epoch: int,
 
             # 2. Calculate and accumulate loss
             loss = loss_fn(test_pred_logits, y)
-            test_loss += loss.item()
+            val_loss += loss.item()
 
             # Calculate and accumulate accuracy
             if classification:
                 test_pred_labels = test_pred_logits.argmax(dim=1)
-                test_acc += ((test_pred_labels == y).sum().item()/len(test_pred_labels))
+                val_acc += ((test_pred_labels == y).sum().item()/len(test_pred_labels))
             
             # Update progress bar
             progress_bar.set_postfix(
                 {
-                  "test_loss": test_loss / (batch + 1),
+                  "val_loss": val_loss / (batch + 1),
                 }
             )
             progress_bar.update()
 
     # Adjust metrics to get average loss and accuracy per batch 
-    test_loss = test_loss / len(dataloader)
-    test_acc = test_acc / len(dataloader)
+    val_loss = val_loss / len(dataloader)
+    val_acc = val_acc / len(dataloader)
     if classification:
-        return test_loss, test_acc
+        return val_loss, val_acc
     else:
-        return test_loss
+        return val_loss
 
 def train(model: torch.nn.Module, 
           train_dataloader: torch.utils.data.DataLoader, 
-          test_dataloader: torch.utils.data.DataLoader, 
+          val_dataloader: torch.utils.data.DataLoader, 
           optimizer: torch.optim.Optimizer,
           loss_fn: torch.nn.Module,
           epochs: int,
@@ -210,7 +210,7 @@ def train(model: torch.nn.Module,
     Args:
     model: A PyTorch model to be trained and tested.
     train_dataloader: A DataLoader instance for the model to be trained on.
-    test_dataloader: A DataLoader instance for the model to be tested on.
+    val_dataloader: A DataLoader instance for the model to be tested on.
     optimizer: A PyTorch optimizer to help minimize the loss function.
     loss_fn: A PyTorch loss function to calculate loss on both datasets.
     epochs: An integer indicating how many epochs to train for.
@@ -226,19 +226,19 @@ def train(model: torch.nn.Module,
     each epoch.
     In the form: {train_loss: [...],
               train_acc: [...],
-              test_loss: [...],
-              test_acc: [...]} 
+              val_loss: [...],
+              val_acc: [...]} 
     For example if training for epochs=2: 
              {train_loss: [2.0616, 1.0537],
               train_acc: [0.3945, 0.3945],
-              test_loss: [1.2641, 1.5706],
-              test_acc: [0.3400, 0.2973]} 
+              val_loss: [1.2641, 1.5706],
+              val_acc: [0.3400, 0.2973]} 
     """
     # Create empty results dictionary
     results = {"train_loss": [],
                "train_acc": [],
-               "test_loss": [],
-               "test_acc": []
+               "val_loss": [],
+               "val_acc": []
     }
     
     # Make sure model on target device
@@ -259,10 +259,10 @@ def train(model: torch.nn.Module,
         progress_bar.set_description(f"Epoch {epoch+1}")
         try:
             train_loss, train_acc = 0, 0
-            test_loss, test_acc = 0, 0
+            val_loss, val_acc = 0, 0
             if classification:
                 train_metrics = train_loss, train_acc
-                test_metrics = test_loss, test_acc
+                test_metrics = val_loss, val_acc
             else:
                 train_metrics = train_loss 
             train_metrics = train_step(epoch=epoch,
@@ -275,7 +275,7 @@ def train(model: torch.nn.Module,
                                             disable_progress_bar=False)
             test_metrics = test_step(epoch=epoch,
                                             model=model,
-                                            dataloader=test_dataloader,
+                                            dataloader=val_dataloader,
                                             loss_fn=loss_fn,
                                             device=device,
                                             classification=classification,
@@ -284,43 +284,43 @@ def train(model: torch.nn.Module,
             # Print depending on classification or regression
             if classification:
                 train_loss, train_acc = train_metrics
-                test_loss, test_acc = test_metrics
+                val_loss, val_acc = test_metrics
                 # Print out what's happening
                 print(
                 f"\nEpoch: {epoch+1} | "
                 f"train_loss: {train_loss:.4f} | "
                 f"train_acc: {train_acc:.4f} | "
-                f"test_loss: {test_loss:.4f} | "
-                f"test_acc: {test_acc:.4f}"
+                f"val_loss: {val_loss:.4f} | "
+                f"val_acc: {val_acc:.4f}"
                 )
 
                 # Update results dictionary
                 results["train_loss"].append(train_loss)
                 results["train_acc"].append(train_acc)
-                results["test_loss"].append(test_loss)
-                results["test_acc"].append(test_acc)
+                results["val_loss"].append(val_loss)
+                results["val_acc"].append(val_acc)
             
             else:
                 train_loss = train_metrics
-                test_loss = test_metrics
+                val_loss = test_metrics
                 # Print out what's happening
                 print(
                 f"\ntrain_loss: {train_loss:.4f} | "
-                f"test_loss: {test_loss:.4f}"
+                f"val_loss: {val_loss:.4f}"
                 )
 
                 # Update results dictionary
                 results["train_loss"].append(train_loss)
-                results["test_loss"].append(test_loss)
+                results["val_loss"].append(val_loss)
 
             if writer:
                 # Add loss results to SummaryWriter
                 writer.add_scalar("Loss/Train", train_loss, epoch)
-                writer.add_scalar("Loss/Test", test_loss, epoch)
+                writer.add_scalar("Loss/Val", val_loss, epoch)
                 if classification:
                     # Add accuracy results to SummaryWriter
                     writer.add_scalar("Accuracy/Train", train_acc, epoch)
-                    writer.add_scalar("Accuracy/Test", test_acc, epoch)
+                    writer.add_scalar("Accuracy/Val", val_acc, epoch)
 
                 # Track the PyTorch model architecture
                 writer.add_graph(model=model, 

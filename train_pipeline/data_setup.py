@@ -28,16 +28,18 @@ def create_dataloaders(
 
     Returns:
         train_loader (DataLoader): The data loader for the training set.
+        val_loader (DataLoader): The data loader for the validation set.
         test_loader (DataLoader): The data loader for the test set.
+        mean_std (dict): A dictionary containing the mean and standard deviation of the training dataset.
     """
     if train_size < 0 or train_size > 1:
         raise ValueError("train_size must be a float between 0 and 1.")
     # Define sizes for train and test datasets
     train_size = int(train_size * len(dataset))
-    test_size = len(dataset) - train_size
+    val_size = len(dataset) - train_size
 
     # Split the dataset
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
     # Normalize the data
     # Get the mean and standard deviation of the training dataset
@@ -62,18 +64,18 @@ def create_dataloaders(
     train_dataset.dataset.max_labels = max_labels
     train_dataset.dataset.min = min
     train_dataset.dataset.min_labels = min_labels
-    test_dataset.dataset.mean = mean
-    test_dataset.dataset.mean_labels = mean_labels
-    test_dataset.dataset.std = std
-    test_dataset.dataset.std_labels = std_labels
-    test_dataset.dataset.max = max
-    test_dataset.dataset.max_labels = max
-    test_dataset.dataset.min = min
-    test_dataset.dataset.min_labels = min
+    val_dataset.dataset.mean = mean
+    val_dataset.dataset.mean_labels = mean_labels
+    val_dataset.dataset.std = std
+    val_dataset.dataset.std_labels = std_labels
+    val_dataset.dataset.max = max
+    val_dataset.dataset.max_labels = max
+    val_dataset.dataset.min = min
+    val_dataset.dataset.min_labels = min
 
     # Preprocess the data
     train_dataset.dataset.transform = norm
-    test_dataset.dataset.transform = norm
+    val_dataset.dataset.transform = norm
 
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
@@ -83,7 +85,7 @@ def create_dataloaders(
                             # pin_memory=True # CUDA only
     ) 
 
-    test_loader = DataLoader(dataset=test_dataset,
+    val_loader = DataLoader(dataset=val_dataset,
                             batch_size=batch_size,
                             shuffle=False,
                             num_workers=num_workers,
@@ -93,4 +95,4 @@ def create_dataloaders(
     # Dictionary containing the mean and standard deviation of the training dataset
     mean_std = {"mean": mean, "std": std, "mean_labels": mean_labels, "std_labels": std_labels}
 
-    return train_loader, test_loader, mean_std
+    return train_loader, val_loader, mean_std
