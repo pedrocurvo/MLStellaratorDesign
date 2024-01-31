@@ -43,8 +43,9 @@ if __name__ == "__main__":
 
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
-    train_dataloader, val_dataloader, mean_std = data_setup.create_dataloaders(dataset=full_dataset,
-                                                                    train_size=0.7,
+    train_dataloader, val_dataloader, test_dataloader, mean_std = data_setup.create_dataloaders(dataset=full_dataset,
+                                                                    train_size=0.5,
+                                                                    val_size=0.2,
                                                                     batch_size=BATCH_SIZE,
                                                                     num_workers=NUM_OF_WORKERS
 )

@@ -161,3 +161,13 @@ def create_writer(experiment_name: str,
         
     print(f"[INFO] Created SummaryWriter, saving to: {log_dir}...")
     return SummaryWriter(log_dir=log_dir)
+
+def set_dataset_statistics(dataset, mean, mean_labels, std, std_labels, max_val, max_labels, min_val, min_labels):
+    dataset.mean = mean
+    dataset.mean_labels = mean_labels
+    dataset.std = std
+    dataset.std_labels = std_labels
+    dataset.max = max_val
+    dataset.max_labels = max_labels
+    dataset.min = min_val
+    dataset.min_labels = min_labels

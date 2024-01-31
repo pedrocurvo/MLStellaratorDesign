@@ -8,12 +8,13 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
 from StellatorsDataSet import StellatorsDataSet
-from .utils import norm
+from .utils import norm, set_dataset_statistics
 
 
 def create_dataloaders(
     dataset: Dataset,
     train_size: float,
+    val_size: float,
     batch_size: int, 
     num_workers: int=0
 ):
@@ -23,6 +24,7 @@ def create_dataloaders(
     Args:
         dataset (Dataset): The dataset to be split into train and test sets.
         train_size (float): The proportion of the dataset to be used for training. It should be a float between 0 and 1.
+        val_size (float): The proportion of the dataset to be used for validation. It should be a float between 0 and 1.
         batch_size (int): The number of samples per batch.
         num_workers (int, optional): The number of subprocesses to use for data loading. Defaults to NUM_WORKERS.
 
@@ -32,14 +34,17 @@ def create_dataloaders(
         test_loader (DataLoader): The data loader for the test set.
         mean_std (dict): A dictionary containing the mean and standard deviation of the training dataset.
     """
-    if train_size < 0 or train_size > 1:
+    if train_size < 0 or train_size > 1 or val_size < 0 or val_size > 1:
         raise ValueError("train_size must be a float between 0 and 1.")
+    if train_size + val_size > 1:
+        raise ValueError("train_size + val_size must be less than 1.")
     # Define sizes for train and test datasets
     train_size = int(train_size * len(dataset))
-    val_size = len(dataset) - train_size
+    val_size = int(val_size * len(dataset))
+    test_size = len(dataset) - train_size - val_size
 
     # Split the dataset
-    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+    train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
     # Normalize the data
     # Get the mean and standard deviation of the training dataset
@@ -56,26 +61,15 @@ def create_dataloaders(
     min = torch.min(torch.tensor(train_dataset.dataset.features), dim=0).values.float()
     min_labels = torch.min(torch.tensor(train_dataset.dataset.labels), dim=0).values.float()
 
-    train_dataset.dataset.mean = mean
-    train_dataset.dataset.mean_labels = mean_labels
-    train_dataset.dataset.std = std
-    train_dataset.dataset.std_labels = std_labels
-    train_dataset.dataset.max = max
-    train_dataset.dataset.max_labels = max_labels
-    train_dataset.dataset.min = min
-    train_dataset.dataset.min_labels = min_labels
-    val_dataset.dataset.mean = mean
-    val_dataset.dataset.mean_labels = mean_labels
-    val_dataset.dataset.std = std
-    val_dataset.dataset.std_labels = std_labels
-    val_dataset.dataset.max = max
-    val_dataset.dataset.max_labels = max
-    val_dataset.dataset.min = min
-    val_dataset.dataset.min_labels = min
+    # Set the mean and standard deviation of the training dataset
+    set_dataset_statistics(train_dataset.dataset, mean, mean_labels, std, std_labels, max, max_labels, min, min_labels)
+    set_dataset_statistics(val_dataset.dataset, mean, mean_labels, std, std_labels, max, max_labels, min, min_labels)
+    set_dataset_statistics(test_dataset.dataset, mean, mean_labels, std, std_labels, max, max_labels, min, min_labels)
 
     # Preprocess the data
     train_dataset.dataset.transform = norm
     val_dataset.dataset.transform = norm
+    test_dataset.dataset.transform = norm
 
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
@@ -92,7 +86,14 @@ def create_dataloaders(
                             pin_memory=True
     )
 
+    test_loader = DataLoader(dataset=test_dataset,
+                            batch_size=batch_size,
+                            shuffle=False,
+                            num_workers=num_workers,
+                            # pin_memory=True
+    )
+
     # Dictionary containing the mean and standard deviation of the training dataset
     mean_std = {"mean": mean, "std": std, "mean_labels": mean_labels, "std_labels": std_labels}
 
-    return train_loader, val_loader, mean_std
+    return train_loader, val_loader, test_loader, mean_std
