@@ -7,7 +7,7 @@ from StellatorsDataSet import StellatorsDataSet
 from timeit import default_timer as timer
 from datetime import datetime
 import torch.nn as nn
-from train_pipeline import engine, model_builder, utils, data_setup
+from train_pipeline import engine, model_builder, utils, data_setup, predictions
 from torchsummary import summary
 
 # Important for num_workers > 0
@@ -66,8 +66,8 @@ if __name__ == "__main__":
     writer = utils.create_writer(experiment_name="MLStellaratorDesign",
                                 model_name=model.__class__.__name__,
     )
-    # Add Model Architecture to TensorBoard
-    writer.add_text("Model Summary", str(model))
+    # # Add Model Architecture to TensorBoard
+    # writer.add_text("Model Summary", str(model))
     # Add Hyperparameters to TensorBoard
     writer.add_hparams({"batch_size": BATCH_SIZE,
                         "num_epochs": NUM_EPOCHS,
@@ -118,3 +118,19 @@ if __name__ == "__main__":
     utils.save_model(model=model,
                     target_dir=f"models/{model.__class__.__name__}",
                     model_name=f"{current_date}.pth")
+    
+    # -----------------------------------------------------------------------------
+    # Test the model using the test dataset with help from predictions.py
+
+    # Confusion Matrix
+    confuse = predictions.nfp_confusion_matrix(dataloader=test_dataloader,
+                            model=model,
+                            device=device,
+                            mean=0,
+                            std=1,
+                            mean_labels=mean_std["mean_labels"],
+                            std_labels=mean_std["std_labels"]
+    )
+    
+    # Add Confusion Matrix to TensorBoard
+    writer.add_figure("Confusion Matrix", confuse)

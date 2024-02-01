@@ -7,9 +7,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from model_builder import Model
 from sklearn.metrics import confusion_matrix
 from torchinfo import summary
+from tqdm import tqdm
+import io
 
 def predict(model, data, device):
     """
@@ -69,42 +70,108 @@ def correlation_coefficient(model, data, device, method="pearson"):
     return correlation_coefficient
 
 
-# Testar
-model = Model(9, 10)
-# Load the model
-model.load_state_dict(torch.load("../models/Model.pth"))
-# Set the model to evaluation mode
-model.eval()
-# Load the data
-data = np.load("../data/dataset.npy")
-# Convert data to tensor
-data = torch.from_numpy(data).float()
-# Separate the data into inputs and targets
-inputs = data[:, :9]
-print(f'Size of inputs: {inputs.shape}')
-targets = data[:, 9:]
-print(f'Size of targets: {targets.shape}')
-# Make predictions
-predictions = predict(model, inputs, "cpu")
-print(f'Size of predictions: {predictions.shape}')
-# # Convert predictions and targets to NumPy arrays
-# predictions = predictions.cpu().numpy()
-# targets = targets.cpu().numpy()
-# # With predictions and targets, plot the correlation matrix
-# df_predictions = pd.DataFrame(predictions)
-# df_targets = pd.DataFrame(targets)
+def nfp_confusion_matrix(dataloader: torch.utils.data.DataLoader,
+                         model: torch.nn.Module,
+                         device: torch.device,
+                         mean: torch.tensor = 0,
+                         std: torch.tensor = 1,
+                         mean_labels: torch.tensor = 0,
+                         std_labels: torch.tensor = 1,
+                         normalize: int = 0):
+    """Returns a confusion matrix for the nfp predictions.
 
-# # Convert dataframes to series if they're not already
-# predictions = df_predictions.squeeze()
-# targets = df_targets.squeeze()
+    Args:
+        dataloader (torch.utils.data.DataLoader): The data loader for the test set.
+        model (torch.nn.Module): The model to make predictions with.
+        device (torch.device): The device to run the model on.
+        mean (torch.tensor): The mean of the training dataset. Defaults to 0.
+        std (torch.tensor): The standard deviation of the training dataset. Defaults to 1.
+        mean_labels (torch.tensor): The mean of the training dataset labels. Defaults to 0.
+        std_labels (torch.tensor): The standard deviation of the training dataset labels. Defaults to 1.
+        normalize (int, optional): The normalization dimension. Defaults to 0 (col normalization), 1 for row normalization.
 
-# Check MSE for first column
-for i in range(9):
-    mse = F.mse_loss(predictions[:,i], targets[:,i])
-    print(f'MSE for column {i}: {mse}')
-    if i == 6:
-        pred = torch.round(predictions[:,i])
-        mse = F.mse_loss(pred, targets[:,i])
-        print(f'MSE for column {i} rounded: {mse}')
+    Returns:
+        torch.tensor: The confusion matrix.
+    """
+    # Set the model to evaluation mode
+    model.eval()
+
+    # Create an empty confusion matrix
+    matrix = torch.zeros(10, 10, dtype=torch.int32)
+
+    # Create a progress bar
+    progress_bar = tqdm(
+        enumerate(dataloader),
+        total=len(dataloader),
+        desc="Creating Confusion Matrix",
+        leave=False,
+        colour="green"
+    )
+
+    # Loop through data loader data batches
+    with torch.no_grad():
+        for i, (features, labels) in progress_bar:
+            # Move the data to the device
+            features = features.to(device)
+            labels = labels.to(device)
+
+            # Make predictions with the model
+            y_pred = model((features - mean) / std)
+            y_pred = y_pred[:, 6] * std_labels[6] + mean_labels[6]
+            y_pred = torch.round(y_pred).detach().numpy().astype(int)
+
+            # Renoormalize the labels
+            labels = labels[:, 6] * std_labels[6] + mean_labels[6]
+            labels = torch.round(labels).detach().numpy().astype(int)
+
+            # Remove the batch dimension from the labels
+            labels = labels.squeeze()
+
+            # Remove the batch dimension from the predictions
+            y_pred = y_pred.squeeze()
+
+            # Accumulate the confusion matrix
+            for i in range(len(y_pred)):
+                if 0 <= labels[i] - 1 < 10 and 0 <= y_pred[i] - 1 < 10:
+                    matrix[labels[i] - 1, y_pred[i] - 1] += 1
+            progress_bar.update()
+            
+        # Metrics for Matrix
+        total_samples = torch.sum(matrix)
+        percentage_of_acceptance = total_samples / dataloader.dataset.__len__()
+        accuracy = torch.trace(matrix) / torch.sum(matrix)
+        precision = torch.diag(matrix) / torch.sum(matrix, dim=0)
+        recall = torch.diag(matrix) / torch.sum(matrix, dim=1)
+        f1 = 2 * precision * recall / (precision + recall)
+        metrics = {"accuracy": accuracy,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1}
+        
+        print(f"Total Samples: {total_samples}")
+        print(f"Percentage of Acceptance: {percentage_of_acceptance}")
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"F1: {f1}")
+    
+    # Normalize the confusion matrix
+    matrix = matrix / matrix.sum(axis=normalize, keepdims=True)
+    # Only keep 2 decimals
+    matrix = matrix.detach().numpy()
+    matrix = np.around(matrix, decimals=2)
+    
+    # Create an Image of the Confusion Matrix
+    figure = plt.figure(figsize=(8, 8))
+    sns.heatmap(matrix, annot=True, cmap="Blues")
+    plt.title("NFP Confusion Matrix")
+    plt.xlabel("Predictions")
+    plt.ylabel("Targets")
+    tick_marks = np.arange(10) + 0.5
+    # NFP go from 1 to 10, so we need to shift the ticks
+    plt.xticks(tick_marks, np.arange(1, 11))
+    plt.yticks(tick_marks, np.arange(1, 11))
+
+    return figure
 
 

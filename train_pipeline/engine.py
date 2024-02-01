@@ -327,8 +327,6 @@ def train(model: torch.nn.Module,
                             # Pass in an example input
                             input_to_model=torch.randn(32, 9).to(device))
 
-                # Close the writer
-                writer.close()
         except KeyboardInterrupt:
             print("\nKeyboard interrupt detected.")
             print("Stopping training...")
