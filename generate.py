@@ -1,5 +1,6 @@
+import os
+import time
 import numpy as np
-import pandas as pd
 
 from qsc import Qsc
 from qsc.util import mu0, fourier_minimum
@@ -10,32 +11,29 @@ from qsc.util import mu0, fourier_minimum
 import warnings
 warnings.filterwarnings('error')
 
-from qsc.newton import logger
 def warning(msg, *args, **kwargs):
     raise RuntimeWarning(msg)
-logger.warning = warning
 
-# -----------------------------------------------------------------------------
-# set up the output directory, and the output file
+from qsc.newton import logger as logger1
+from qsc.calculate_r2 import logger as logger2
+from qsc.calculate_r3 import logger as logger3
 
-from pathlib import Path
-
-DATA_DIR = Path('data')
-DATA_DIR.mkdir(exist_ok=True, parents=True)
-
-fname = DATA_DIR.joinpath('dataset.csv')
+logger1.warning = warning
+logger2.warning = warning
+logger3.warning = warning
 
 # -----------------------------------------------------------------------------
 # open the output file for writing or appending
 
-if not fname.exists():
+fname = 'dataset.csv'
+
+if not os.path.exists(fname):
     f = open(fname, 'w')
 
     fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2',
             'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 'r_singularity',
             'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2']
 
-    print(','.join(fields))
     print(','.join(fields), file=f)
 
 else:
@@ -43,6 +41,9 @@ else:
 
 # -----------------------------------------------------------------------------
 # keep generating until keyboard interrupt
+
+counter = 0
+t_start = time.time()
 
 while True:
 
@@ -70,6 +71,7 @@ while True:
     try:
         stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order=order)
 
+#        axis_length    = stel.axis_length
         iota           = stel.iota
         max_elongation = stel.max_elongation
         min_L_grad_B   = stel.min_L_grad_B
@@ -90,18 +92,19 @@ while True:
         # assert beta >= 1e-4
         # assert DMerc_times_r2 > 0.
 
-        values = [rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2,
-                  iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
-                  L_grad_grad_B, B20_variation, beta, DMerc_times_r2]
+        values = np.array([rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2,
+                           iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
+                           L_grad_grad_B, B20_variation, beta, DMerc_times_r2])
 
         assert not np.isnan(values).any()
         assert not np.isinf(values).any()
-        
-        # Assert that no value is above 1e9
-        assert all(value <= 1e9 for value in values)
+        assert not (np.fabs(values) > np.finfo(np.float32).max).any()
 
-        print(','.join([str(value) for value in values]))
-        print(','.join([str(value) for value in values]), file=f)
+        counter += 1
+        seconds = time.time() - t_start
+        print('\r%d samples %d secs %.1f samples/sec ' % (counter, seconds, counter/seconds), end=' ')
+
+        print(','.join(values.astype(str)), file=f)
 
     except Warning:
         continue
@@ -112,16 +115,9 @@ while True:
     except KeyboardInterrupt:
         break
 
+print()
+
 # -----------------------------------------------------------------------------
 # close the output file
 
 f.close()
-
-# -----------------------------------------------------------------------------
-# try reading the file to check the results
-
-df = pd.read_csv(fname)
-if len(df) > 0:
-    print(df)
-
-# -----------------------------------------------------------------------------
