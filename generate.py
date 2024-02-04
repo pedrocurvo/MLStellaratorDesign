@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+import pandas as pd
 
 from qsc import Qsc
 from qsc.util import mu0, fourier_minimum
@@ -28,17 +29,18 @@ logger3.warning = warning
 fname = 'dataset.csv'
 
 if not os.path.exists(fname):
+    n_prev = 0
     f = open(fname, 'w')
-
     fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3',
               'nfp', 'etabar', 'B2c', 'p2', 'axis_length',
               'iota', 'max_elongation', 'min_L_grad_B',
               'min_R0', 'r_singularity', 'L_grad_grad_B',
               'B20_variation', 'beta', 'DMerc_times_r2']
-
     print(','.join(fields), file=f)
 
 else:
+    df = pd.read_csv(fname)
+    n_prev = df.shape[0]
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
@@ -106,7 +108,7 @@ while True:
 
         counter += 1
         seconds = time.time() - t_start
-        print('\r%d samples %d secs %.1f samples/sec ' % (counter, seconds, counter/seconds), end=' ')
+        print('\r%d samples %d seconds %.1f samples/sec ' % (counter + n_prev, seconds, counter/seconds), end=' ')
 
         print(','.join(values.astype(str)), file=f)
 
