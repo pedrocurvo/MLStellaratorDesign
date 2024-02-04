@@ -30,9 +30,11 @@ fname = 'dataset.csv'
 if not os.path.exists(fname):
     f = open(fname, 'w')
 
-    fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2',
-            'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 'r_singularity',
-            'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2']
+    fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3',
+              'nfp', 'etabar', 'B2c', 'p2', 'axis_length',
+              'iota', 'max_elongation', 'min_L_grad_B',
+              'min_R0', 'r_singularity', 'L_grad_grad_B',
+              'B20_variation', 'beta', 'DMerc_times_r2']
 
     print(','.join(fields), file=f)
 
@@ -71,7 +73,7 @@ while True:
     try:
         stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order=order)
 
-#        axis_length    = stel.axis_length
+        axis_length    = stel.axis_length
         iota           = stel.iota
         max_elongation = stel.max_elongation
         min_L_grad_B   = stel.min_L_grad_B
@@ -92,9 +94,11 @@ while True:
         # assert beta >= 1e-4
         # assert DMerc_times_r2 > 0.
 
-        values = np.array([rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2,
-                           iota, max_elongation, min_L_grad_B, min_R0, r_singularity,
-                           L_grad_grad_B, B20_variation, beta, DMerc_times_r2])
+        values = np.array([rc1, rc2, rc3, zs1, zs2, zs3,
+                           nfp, etabar, B2c, p2, axis_length,
+                           iota, max_elongation, min_L_grad_B,
+                           min_R0, r_singularity, L_grad_grad_B,
+                           B20_variation, beta, DMerc_times_r2])
 
         assert not np.isnan(values).any()
         assert not np.isinf(values).any()
