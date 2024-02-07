@@ -22,7 +22,7 @@ npy_file_path = csv_file_path.replace('.csv', '.npy')
 chunk_size = 10000
 
 # NP array to store the data
-data = np.empty((0, 19))
+data = np.empty((0, 20))
 
 # Iterate over chunks of the CSV file
 for chunk in pd.read_csv(csv_file_path, chunksize=chunk_size):
