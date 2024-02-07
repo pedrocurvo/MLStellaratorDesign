@@ -70,11 +70,9 @@ def correlation_coefficient(model, data, device, method="pearson"):
     return correlation_coefficient
 
 
-def nfp_confusion_matrix(dataloader: torch.utils.data.DataLoader,
-                         model: torch.nn.Module,
-                         device: torch.device,
-                         mean: torch.tensor = 0,
-                         std: torch.tensor = 1,
+def nfp_confusion_matrix(y_true: torch.tensor,
+                         y_pred: torch.tensor,
+                         nfp_index: int = 6,
                          mean_labels: torch.tensor = 0,
                          std_labels: torch.tensor = 1,
                          normalize: int = 0):
@@ -93,67 +91,49 @@ def nfp_confusion_matrix(dataloader: torch.utils.data.DataLoader,
     Returns:
         torch.tensor: The confusion matrix.
     """
-    # Set the model to evaluation mode
-    model.eval()
 
     # Create an empty confusion matrix
     matrix = torch.zeros(10, 10, dtype=torch.int32)
 
+    # Renormalize the predictions
+    y_pred = y_pred[:, nfp_index] * std_labels[nfp_index] + mean_labels[nfp_index]
+    y_pred = torch.round(y_pred).detach().numpy().astype(int)
+
+    y_true = y_true[:, nfp_index] * std_labels[nfp_index] + mean_labels[nfp_index]
+    y_true = torch.round(y_true).detach().numpy().astype(int)
+
     # Create a progress bar
     progress_bar = tqdm(
-        enumerate(dataloader),
-        total=len(dataloader),
+        enumerate(y_pred),
+        total=len(y_pred),
         desc="Creating Confusion Matrix",
         leave=False,
         colour="green"
     )
-
-    # Loop through data loader data batches
-    with torch.no_grad():
-        for i, (features, labels) in progress_bar:
-            # Move the data to the device
-            features = features.to(device)
-            labels = labels.to(device)
-
-            # Make predictions with the model
-            y_pred = model((features - mean) / std)
-            y_pred = y_pred[:, 6] * std_labels[6] + mean_labels[6]
-            y_pred = torch.round(y_pred).detach().numpy().astype(int)
-
-            # Renoormalize the labels
-            labels = labels[:, 6] * std_labels[6] + mean_labels[6]
-            labels = torch.round(labels).detach().numpy().astype(int)
-
-            # Remove the batch dimension from the labels
-            labels = labels.squeeze()
-
-            # Remove the batch dimension from the predictions
-            y_pred = y_pred.squeeze()
-
-            # Accumulate the confusion matrix
-            for i in range(len(y_pred)):
-                if 0 <= labels[i] - 1 < 10 and 0 <= y_pred[i] - 1 < 10:
-                    matrix[labels[i] - 1, y_pred[i] - 1] += 1
-            progress_bar.update()
-            
-        # Metrics for Matrix
-        total_samples = torch.sum(matrix)
-        percentage_of_acceptance = total_samples / dataloader.dataset.__len__()
-        accuracy = torch.trace(matrix) / torch.sum(matrix)
-        precision = torch.diag(matrix) / torch.sum(matrix, dim=0)
-        recall = torch.diag(matrix) / torch.sum(matrix, dim=1)
-        f1 = 2 * precision * recall / (precision + recall)
-        metrics = {"accuracy": accuracy,
-                    "precision": precision,
-                    "recall": recall,
-                    "f1": f1}
+    # Accumulate the confusion matrix
+    for i, _ in progress_bar:
+        if 0 <= y_true[i] - 1 < 10 and 0 <= y_pred[i] - 1 < 10:
+            matrix[y_true[i] - 1, y_pred[i] - 1] += 1
+        progress_bar.update()
         
-        print(f"Total Samples: {total_samples}")
-        print(f"Percentage of Acceptance: {percentage_of_acceptance}")
-        print(f"Accuracy: {accuracy}")
-        print(f"Precision: {precision}")
-        print(f"Recall: {recall}")
-        print(f"F1: {f1}")
+    # Metrics for Matrix
+    total_samples = torch.sum(matrix)
+    percentage_of_acceptance = total_samples / y_pred.shape[0]
+    accuracy = torch.trace(matrix) / torch.sum(matrix)
+    precision = torch.diag(matrix) / torch.sum(matrix, dim=0)
+    recall = torch.diag(matrix) / torch.sum(matrix, dim=1)
+    f1 = 2 * precision * recall / (precision + recall)
+    metrics = {"accuracy": accuracy,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1}
+        
+    print(f"Total Samples: {total_samples}")
+    print(f"Percentage of Acceptance: {percentage_of_acceptance}")
+    print(f"Accuracy: {accuracy}")
+    print(f"Precision: {precision}")
+    print(f"Recall: {recall}")
+    print(f"F1: {f1}")
     
     # Normalize the confusion matrix
     matrix = matrix / matrix.sum(axis=normalize, keepdims=True)
@@ -171,7 +151,32 @@ def nfp_confusion_matrix(dataloader: torch.utils.data.DataLoader,
     # NFP go from 1 to 10, so we need to shift the ticks
     plt.xticks(tick_marks, np.arange(1, 11))
     plt.yticks(tick_marks, np.arange(1, 11))
+    plt.show()
 
     return figure
 
+
+def distribution_hist(y_true: torch.tensor,
+                      y_pred: torch.tensor,
+                      variable_name: str,
+                      variable_index: int,
+                      mean: torch.tensor = 0,
+                      std: torch.tensor = 1):
+    """Returns a histogram for the distribution of a variable."""
+
+    # Renormalize the predictions
+    y_pred = y_pred[:, variable_index] * std + mean
+    y_pred = y_pred.detach().numpy()
+
+    y_true = y_true[:, variable_index] * std + mean
+    y_true = y_true.detach().numpy()
+
+    # Create a figure
+    figure = plt.figure(figsize=(8, 8))
+    sns.histplot(y_true, color="blue", kde=True, label="True", stat="density")
+    sns.histplot(y_pred, color="red", kde=True, label="Predicted", stat="density")
+    plt.legend()
+    plt.title(f"Distribution of {variable_name}")
+
+    return figure
 

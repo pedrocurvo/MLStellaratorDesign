@@ -2,13 +2,16 @@ from torch.utils.data import DataLoader, random_split
 import torch
 from torchvision import transforms
 import os
-from StellatorsDataSet import StellatorsDataSet
+from StellaratorsDataSet import StellaratorDataSet
 # Measure time
 from timeit import default_timer as timer
 from datetime import datetime
 import torch.nn as nn
 from train_pipeline import engine, model_builder, utils, data_setup, predictions
+from train_pipeline.MBuilder.MixtureDensityNetwork import MixtureDensityNetwork, log_sum_exp, mean_log_Gaussian_like
 from torchsummary import summary
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Important for num_workers > 0
 if __name__ == "__main__":
@@ -21,7 +24,20 @@ if __name__ == "__main__":
 
     # Dataset
     # Load the data
-    full_dataset = StellatorsDataSet(npy_file='data/dataset.npy')
+    full_dataset = StellaratorDataSet(npy_file='data/dataset.npy')
+
+    # full_dataset = full_dataset.calculate_data_counts(
+    #                           AXIS_LENGTH=0,
+    #                           IOTA_MIN = 0.2,
+    #                           MAX_ELONGATION = 100,
+    #                           MIN_MIN_L_GRAD_B = 0.01,
+    #                           MIN_MIN_R0 = 0.3,
+    #                           MIN_R_SINGULARITY = 0,
+    #                           MIN_L_GRAD_GRAD_B = 0.001,
+    #                           MAX_B20_VARIATION = 5,
+    #                           MIN_BETA = 1e-4,
+    #                           MIN_DMERC_TIMES_R2 = 0,
+    #                           return_object=True)
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -36,7 +52,7 @@ if __name__ == "__main__":
     # Setup the Hyperparameters
     BATCH_SIZE = args.batch_size
     NUM_EPOCHS = args.num_epochs
-    LEARING_RATE = args.learning_rate
+    LEARNING_RATE = args.learning_rate
     WEIGHT_DECAY = args.weight_decay
     MOMENTUM = 0
     NUM_OF_WORKERS = 0
@@ -51,16 +67,22 @@ if __name__ == "__main__":
 )
 
     # Create the model from the model_builder.py
-    model = model_builder.Model(input_dim=9,
-                                output_dim=10
+    # model = model_builder.Model(input_dim=9,
+    #                             output_dim=10
+    # ).to(device)
+    model = MixtureDensityNetwork(input_dim=10,
+                                output_dim=10,
+                                num_gaussians=50
     ).to(device)
 
     # Set up loss function and optimizer
-    loss_fn = getattr(nn, args.loss_function)()
-    optimizer = torch.optim.Adam(model.parameters(),
-                                lr=LEARING_RATE,
-                                weight_decay=WEIGHT_DECAY
-    )
+    # loss_fn = getattr(nn, args.loss_function)()
+    loss_fn = mean_log_Gaussian_like
+    # optimizer = torch.optim.Adam(model.parameters(),
+    #                             lr=LEARING_RATE,
+    #                             weight_decay=WEIGHT_DECAY
+    # )
+    optimizer=torch.optim.RMSprop(model.parameters(), lr=0.001, alpha=0.9, eps=1e-07, weight_decay=0, momentum=0, centered=False)
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name="MLStellaratorDesign",
@@ -71,7 +93,7 @@ if __name__ == "__main__":
     # Add Hyperparameters to TensorBoard
     writer.add_hparams({"batch_size": BATCH_SIZE,
                         "num_epochs": NUM_EPOCHS,
-                        "learning_rate": LEARING_RATE,
+                        "learning_rate": LEARNING_RATE,
                         "weight_decay": WEIGHT_DECAY,
                         "momentum": MOMENTUM,
                         "num_of_workers": NUM_OF_WORKERS,
@@ -122,15 +144,29 @@ if __name__ == "__main__":
     # -----------------------------------------------------------------------------
     # Test the model using the test dataset with help from predictions.py
 
+    # True vs Predicted
+    y_true, y_pred = model.predict(test_dataloader,
+                                    device
+    )
+
     # Confusion Matrix
-    confuse = predictions.nfp_confusion_matrix(dataloader=test_dataloader,
-                            model=model,
-                            device=device,
-                            mean=0,
-                            std=1,
+    confuse = predictions.nfp_confusion_matrix(
+                            y_true=y_true,
+                            y_pred=y_pred,
                             mean_labels=mean_std["mean_labels"],
                             std_labels=mean_std["std_labels"]
     )
+
+    for i in range(10):
+        distribution_hist = predictions.distribution_hist(y_true,
+                                                          y_pred,
+                                                          full_dataset.labels_names[i],
+                                                          i,
+                                                          mean_std["mean_labels"][i],
+                                                          mean_std["std_labels"][i]
+        )
+        writer.add_figure(f"Distribution of {full_dataset.labels_names[i]} ", distribution_hist)
+
     
     # Add Confusion Matrix to TensorBoard
     writer.add_figure("Confusion Matrix", confuse)
