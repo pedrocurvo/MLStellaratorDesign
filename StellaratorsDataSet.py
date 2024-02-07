@@ -8,8 +8,23 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 from qsc import Qsc
 
-class StellatorsDataSet(Dataset):
-    def __init__(self, npy_file, transform=None, normalization=None, sample_size=None):
+class StellaratorDataSet(Dataset):
+    def __init__(self,
+                 npy_file,
+                 transform=None,
+                 normalization=None,
+                 sample_size: int = None,
+                 features_names: list[str] = ['axis_length', 'iota', 'max_elongation', 'min_L_grad_B', 'min_R0', 
+                    'r_singularity', 'L_grad_grad_B', 'B20_variation', 'beta', 'DMerc_times_r2'],
+                 labels_names: list[str] = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3', 'nfp', 'etabar', 'B2c', 'p2'],
+                 dtype=torch.float32):
+        
+        # Keep the name of the features and labels
+        self.features_names = features_names
+        self.labels_names = labels_names
+        self.separation_idx = len(labels_names)
+
+        # Load the data
         # If npy_file is a npy array
         if isinstance(npy_file, np.ndarray):
             self.data = npy_file
@@ -27,8 +42,8 @@ class StellatorsDataSet(Dataset):
 
         self.transform = transform
         self.normalization = normalization
-        self.features = self.data[:, 10:]
-        self.labels = self.data[:, :10]
+        self.features = self.data[:, self.separation_idx:]
+        self.labels = self.data[:, :self.separation_idx]
         # ---------------------------------------------------------------------
         # The Atrributes below are used for normalization
         # ---------------------------------------------------------------------
@@ -45,44 +60,9 @@ class StellatorsDataSet(Dataset):
 
         # Dictionary of features and labels
         # Maps the feature/label name to the index in the data array
-        self.data_dict = {'rc1' : 0,
-                            'rc2' : 1,
-                            'rc3' : 2,
-                            'zs1' : 3,
-                            'zs2' : 4,
-                            'zs3' : 5,
-                            'nfp' : 6,
-                            'etabar' : 7,
-                            'B2c' : 8,
-                            'p2' : 9,
-                            'iota' : 10,
-                            'max_elongation' : 11,
-                            'min_L_grad_B' : 12,
-                            'min_R0' : 13,
-                            'r_singularity' : 14,
-                            'L_grad_grad_B' : 15,
-                            'B20_variation' : 16,
-                            'beta' : 17,
-                            'DMerc_times_r2' : 18}
-        self.features_dict = {'iota' : 0,
-                              'max_elongation' : 1,
-                              'min_L_grad_B' : 2,
-                              'min_R0' : 3,
-                              'r_singularity' : 4,
-                              'L_grad_grad_B' : 5,
-                              'B20_variation' : 6,
-                              'beta' : 7,
-                              'DMerc_times_r2' : 8}
-        self.labels_dict = {'rc1' : 0,
-                            'rc2' : 1,
-                            'rc3' : 2,
-                            'zs1' : 3,
-                            'zs2' : 4,
-                            'zs3' : 5,
-                            'nfp' : 6,
-                            'etabar' : 7,
-                            'B2c' : 8,
-                            'p2' : 9}
+        self.data_dict = {name: idx for idx, name in enumerate(labels_names + features_names)}
+        self.features_dict = {name: idx for idx, name in enumerate(features_names)}
+        self.labels_dict = {name: idx for idx, name in enumerate(labels_names)}
         
     #------------------------------------------------------------------------------
     # Essential for DataLoader to work
@@ -107,11 +87,24 @@ class StellatorsDataSet(Dataset):
 
     def __next__(self):
         if self.index < len(self.data):
-            result = self.data[self.index]
-            self.index += 1
-            return Qsc(rc=[1., result[0], result[1], result[2]], zs=[0., result[3], result[4], result[5]], nfp=result[6], etabar=result[7], B2c=result[8], p2=result[9], order='r2')
+            try:
+                # Unpack the result tuple for better readability
+                rc1, rc2, rc3, zs1, zs2, zs3, nfp, etabar, B2c, p2 = self.data[self.index]
+                
+                # Create Qsc object
+                qsc_object = Qsc(rc=[1., rc1, rc2, rc3], zs=[0., zs1, zs2, zs3], nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order='r2')
+                
+                self.index += 1
+                return qsc_object
+            except Exception as e:
+                # Handle any exceptions that may occur during iteration
+                print(f"An error occurred while creating Qsc object: {e}")
+                self.index += 1
+                return None
         else:
+            # Signal the end of iteration
             raise StopIteration
+
 
     #------------------------------------------------------------------------------
     # View the distributions of the dataset
@@ -135,9 +128,9 @@ class StellatorsDataSet(Dataset):
             None
         """
         if variables == 'features':
-            variables = [key for key in self.features_dict.keys()]
+            variables = self.features_names
         elif variables == 'labels':
-            variables = [key for key in self.labels_dict.keys()]
+            variables = self.labels_names
         # Validate inputs
         if not variables:
             raise ValueError("No variables provided")
@@ -153,7 +146,7 @@ class StellatorsDataSet(Dataset):
         subset_size = int((percentage / 100) * len(self.data))
 
         # Set plot style
-        sns.set(style="whitegrid")
+        sns.set_theme(style="whitegrid")
 
         # Plot the distribution of the variable
         if overlap:
@@ -218,7 +211,7 @@ class StellatorsDataSet(Dataset):
             subset = pd.DataFrame(self.data[:subset_size, :], columns=[key for key in self.data_dict.keys()])
 
         plt.figure(figsize=(12, 18))
-        sns.set(style="white")
+        sns.set_theme(style="white")
 
         # Compute the correlation matrix for the inputs 
         correlation_matrix = subset.corr(method=method)
@@ -236,21 +229,23 @@ class StellatorsDataSet(Dataset):
         if show:
             plt.show()
 
-
-    def calculate_data_counts(self, IOTA_MIN, MAX_ELONGATION, MIN_MIN_L_GRAD_B, MIN_MIN_R0, MIN_R_SINGULARITY, MIN_L_GRAD_GRAD_B, MAX_B20_VARIATION, MIN_BETA, MIN_DMERC_TIMES_R2, return_object=False):
+    #------------------------------------------------------------------------------
+    def calculate_data_counts(self, AXIS_LENGTH, IOTA_MIN, MAX_ELONGATION, MIN_MIN_L_GRAD_B, MIN_MIN_R0, MIN_R_SINGULARITY, MIN_L_GRAD_GRAD_B, MAX_B20_VARIATION, MIN_BETA, MIN_DMERC_TIMES_R2, return_object=False):
         file = self.data
         # 9 features to check 
-        iota = np.count_nonzero(np.fabs(file[:, 10]) >= IOTA_MIN)
-        max_elongation = np.count_nonzero(file[:, 11] <= MAX_ELONGATION)
-        min_L_grad_B = np.count_nonzero(np.fabs(file[:, 12]) >= MIN_MIN_L_GRAD_B)
-        min_R0 = np.count_nonzero(file[:, 13] >= MIN_MIN_R0)
-        r_singularity = np.count_nonzero(file[:, 14] >= MIN_R_SINGULARITY)
-        L_grad_grad_B = np.count_nonzero(np.fabs(file[:, 15]) >= MIN_L_GRAD_GRAD_B)
-        B20_variation = np.count_nonzero(file[:, 16] <= MAX_B20_VARIATION)
-        beta = np.count_nonzero(file[:, 17] >= MIN_BETA)
-        DMerc_times_r2 = np.count_nonzero(file[:, 18] > MIN_DMERC_TIMES_R2)
+        axis_length = np.count_nonzero(file[:, self.data_dict['axis_length']] > AXIS_LENGTH)
+        iota = np.count_nonzero(np.fabs(file[:, self.data_dict['iota']]) >= IOTA_MIN)
+        max_elongation = np.count_nonzero(file[:, self.data_dict['max_elongation']] <= MAX_ELONGATION)
+        min_L_grad_B = np.count_nonzero(np.fabs(file[:, self.data_dict['min_L_grad_B']]) >= MIN_MIN_L_GRAD_B)
+        min_R0 = np.count_nonzero(file[:, self.data_dict['min_R0']] >= MIN_MIN_R0)
+        r_singularity = np.count_nonzero(file[:, self.data_dict['r_singularity']] >= MIN_R_SINGULARITY)
+        L_grad_grad_B = np.count_nonzero(np.fabs(file[:, self.data_dict['L_grad_grad_B']]) >= MIN_L_GRAD_GRAD_B)
+        B20_variation = np.count_nonzero(file[:, self.data_dict['B20_variation']] <= MAX_B20_VARIATION)
+        beta = np.count_nonzero(file[:, self.data_dict['beta']] >= MIN_BETA)
+        DMerc_times_r2 = np.count_nonzero(file[:, self.data_dict['DMerc_times_r2']] > MIN_DMERC_TIMES_R2)
 
         # Percentage of data
+        per_axis_length = axis_length/len(file) * 100
         per_iota = iota/len(file) * 100
         per_max_elongation = max_elongation/len(file) * 100
         per_min_L_grad_B = min_L_grad_B/len(file) * 100
@@ -263,6 +258,7 @@ class StellatorsDataSet(Dataset):
 
         # Define the data as a list of lists
         data = [
+            [f'axis_length > {AXIS_LENGTH}', axis_length, round(per_axis_length, 2)],
             [f'abs(iota) > {IOTA_MIN}', iota, round(per_iota, 2)],
             [f'max_elongation <= {MAX_ELONGATION}', max_elongation, round(per_max_elongation, 2)],
             [f'abs(min_L_grad_B) >= {MIN_MIN_L_GRAD_B}', min_L_grad_B, round(per_min_L_grad_B, 2)],
@@ -278,15 +274,16 @@ class StellatorsDataSet(Dataset):
         print(tabulate(data, headers=['Feature', 'Counts', 'Per of Data'], tablefmt='grid'))
 
         # Count all the data with all restrictions
-        count = np.count_nonzero((np.fabs(file[:, 10]) >= IOTA_MIN) &
-                                (file[:, 11] <= MAX_ELONGATION) &
-                                (np.fabs(file[:, 12]) >= MIN_MIN_L_GRAD_B) &
-                                (file[:, 13] >= MIN_MIN_R0) &
-                                (file[:, 14] >= MIN_R_SINGULARITY) &
-                                (np.fabs(file[:, 15]) >= MIN_L_GRAD_GRAD_B) &
-                                (file[:, 16] <= MAX_B20_VARIATION)
-                                & (file[:, 17] >= MIN_BETA)
-                                & (file[:, 18] > MIN_DMERC_TIMES_R2))
+        count = np.count_nonzero((file[:,  self.data_dict['axis_length']] > AXIS_LENGTH) &
+                                (np.fabs(file[:, self.data_dict['iota']]) >= IOTA_MIN) &
+                                (file[:, self.data_dict['max_elongation']] <= MAX_ELONGATION) &
+                                (np.fabs(file[:, self.data_dict['min_L_grad_B']]) >= MIN_MIN_L_GRAD_B) &
+                                (file[:, self.data_dict['min_R0']] >= MIN_MIN_R0) &
+                                (file[:, self.data_dict['r_singularity']] >= MIN_R_SINGULARITY) &
+                                (np.fabs(file[:, self.data_dict['L_grad_grad_B']]) >= MIN_L_GRAD_GRAD_B) &
+                                (file[:, self.data_dict['B20_variation']] <= MAX_B20_VARIATION)
+                                & (file[:, self.data_dict['beta']] >= MIN_BETA)
+                                & (file[:, self.data_dict['DMerc_times_r2']] > MIN_DMERC_TIMES_R2))
 
         # Percentage of data
         per_count = count/len(file) * 100
@@ -302,22 +299,47 @@ class StellatorsDataSet(Dataset):
         # Return an object that respects all the restrictions
         if return_object:
             ##### Need to specify a deep copy of the data and then replace self.data and then return
-            return StellatorsDataSet(file[(np.fabs(file[:, 10]) >= IOTA_MIN) &
-                        (file[:, 11] <= MAX_ELONGATION) &
-                        (np.fabs(file[:, 12]) >= MIN_MIN_L_GRAD_B) &
-                        (file[:, 13] >= MIN_MIN_R0) &
-                        (file[:, 14] >= MIN_R_SINGULARITY) &
-                        (np.fabs(file[:, 15]) >= MIN_L_GRAD_GRAD_B) &
-                        (file[:, 16] <= MAX_B20_VARIATION)
-                        & (file[:, 17] >= MIN_BETA)
-                        & (file[:, 18] > MIN_DMERC_TIMES_R2)],
+            data = self.data[
+                                (file[:,  self.data_dict['axis_length']] > AXIS_LENGTH) &
+                                (np.fabs(file[:, self.data_dict['iota']]) >= IOTA_MIN) &
+                                (file[:, self.data_dict['max_elongation']] <= MAX_ELONGATION) &
+                                (np.fabs(file[:, self.data_dict['min_L_grad_B']]) >= MIN_MIN_L_GRAD_B) &
+                                (file[:, self.data_dict['min_R0']] >= MIN_MIN_R0) &
+                                (file[:, self.data_dict['r_singularity']] >= MIN_R_SINGULARITY) &
+                                (np.fabs(file[:, self.data_dict['L_grad_grad_B']]) >= MIN_L_GRAD_GRAD_B) &
+                                (file[:, self.data_dict['B20_variation']] <= MAX_B20_VARIATION)
+                                & (file[:, self.data_dict['beta']] >= MIN_BETA)
+                                & (file[:, self.data_dict['DMerc_times_r2']] > MIN_DMERC_TIMES_R2)
+                        ]
+
+            return StellaratorDataSet(data,
                         transform=self.transform,
                         normalization=self.normalization)
 
+    #------------------------------------------------------------------------------
+    # Get the Qsc object from the dataset
     def getQSC(self, idx):
         try:
-            try_one = self.labels[idx]
-            stel = Qsc(rc=[1., try_one[0], try_one[1], try_one[2]], zs=[0., try_one[3], try_one[4], try_one[5]], nfp=try_one[6], etabar=try_one[7], B2c=try_one[8], p2=try_one[9], order='r2')
+            # Extract the label corresponding to the given index
+            label = self.labels[idx]
+            
+            # Extract individual values from the label
+            rc_values = label[:3]
+            zs_values = label[3:6]
+            nfp_value = label[6]
+            etabar_value = label[7]
+            B2c_value = label[8]
+            p2_value = label[9]
+            
+            # Create Qsc object
+            stel = Qsc(rc=[1.] + rc_values, zs=[0.] + zs_values, nfp=nfp_value, etabar=etabar_value, B2c=B2c_value, p2=p2_value, order='r2')
+            
             return stel
-        except:
+        except IndexError:
+            # Handle index out of range error
+            print(f"Index '{idx}' is out of range")
+            return None
+        except Exception as e:
+            # Handle any other exceptions
+            print(f"An error occurred: {e}")
             return None
