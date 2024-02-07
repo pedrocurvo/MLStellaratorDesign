@@ -7,7 +7,7 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
-from StellatorsDataSet import StellatorsDataSet
+from StellaratorsDataSet import StellaratorDataSet
 from .utils import norm, set_dataset_statistics
 
 
@@ -76,6 +76,7 @@ def create_dataloaders(
                             batch_size=batch_size, # samples per batch
                             shuffle=False, # shuffle data (for training set only)
                             num_workers=num_workers, # subprocesses to use for data loading
+                            drop_last=True, # drop the last batch if it is not complete
                             # pin_memory=True # CUDA only
     ) 
 
