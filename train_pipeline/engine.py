@@ -325,7 +325,7 @@ def train(model: torch.nn.Module,
                 # Track the PyTorch model architecture
                 writer.add_graph(model=model, 
                             # Pass in an example input
-                            input_to_model=torch.randn(32, 9).to(device))
+                            input_to_model=torch.randn(32, 10).to(device))
 
         except KeyboardInterrupt:
             print("\nKeyboard interrupt detected.")
