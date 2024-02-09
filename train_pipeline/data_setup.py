@@ -2,12 +2,9 @@
 Contains functionality for creating PyTorch DataLoaders for
 the Stellators dataset.
 """
-import os
 import torch
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
-from StellaratorsDataSet import StellaratorDataSet
 from .utils import norm, set_dataset_statistics
 
 
