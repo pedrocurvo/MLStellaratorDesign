@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader, random_split
 import torch
 from torchvision import transforms
 import os
-from StellaratorsDataSet import StellaratorDataSet
+from StellaratorDataSet import StellaratorDataSetInverse
 # Measure time
 from timeit import default_timer as timer
 from datetime import datetime
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSet(npy_file='data/dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='data/dataset.npy')
 
     # full_dataset = full_dataset.calculate_data_counts(
     #                           AXIS_LENGTH=0,
@@ -48,6 +48,9 @@ if __name__ == "__main__":
         device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
     print(f"Using device: {device}")
+
+    # Setup a Seed for Reproducibility
+    torch.manual_seed(0)
 
     # Setup the Hyperparameters
     BATCH_SIZE = args.batch_size
@@ -82,10 +85,14 @@ if __name__ == "__main__":
     #                             lr=LEARING_RATE,
     #                             weight_decay=WEIGHT_DECAY
     # )
-    optimizer=torch.optim.RMSprop(model.parameters(), lr=0.001, alpha=0.9, eps=1e-07, weight_decay=0, momentum=0, centered=False)
+    optimizer=torch.optim.RMSprop(model.parameters(),
+                                  lr=LEARNING_RATE,
+                                  alpha=0.9, eps=1e-07,
+                                  weight_decay=WEIGHT_DECAY,
+                                  momentum=MOMENTUM, centered=False)
 
     # Create the writer for TensorBoard with help from utils.py
-    writer = utils.create_writer(experiment_name="MLStellaratorDesign",
+    writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",
                                 model_name=model.__class__.__name__,
     )
     # # Add Model Architecture to TensorBoard
@@ -138,7 +145,7 @@ if __name__ == "__main__":
 
     # Save the model with help from utils.py
     utils.save_model(model=model,
-                    target_dir=f"models/{model.__class__.__name__}",
+                    target_dir=f"models/{full_dataset.__class__.__name__}/{model.__class__.__name__}",
                     model_name=f"{current_date}.pth")
     
     # -----------------------------------------------------------------------------
@@ -148,6 +155,9 @@ if __name__ == "__main__":
     y_true, y_pred = model.predict(test_dataloader,
                                     device
     )
+
+    # Loss
+    total_test_loss = nn.MSELoss()(y_pred, y_true).item()
 
     # Confusion Matrix
     confuse = predictions.nfp_confusion_matrix(
