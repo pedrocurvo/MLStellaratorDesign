@@ -6,6 +6,7 @@ import torch
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 import argparse
+import os
 
 def parser():
     """Parses arguments from the command line.
@@ -124,6 +125,7 @@ def norm(X, mean, std):
 
 def create_writer(experiment_name: str, 
                   model_name: str, 
+                  timestamp: str,
                   extra: str=None) -> torch.utils.tensorboard.writer.SummaryWriter:
     """Creates a torch.utils.tensorboard.writer.SummaryWriter() instance saving to a specific log_dir.
 
@@ -147,11 +149,6 @@ def create_writer(experiment_name: str,
         # The above is the same as:
         writer = SummaryWriter(log_dir="runs/2022-06-04/data_10_percent/effnetb2/5_epochs/")
     """
-    from datetime import datetime
-    import os
-
-    # Get timestamp of current date (all experiments on certain day live in same folder)
-    timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") # returns current date in YYYY-MM-DD format
 
     if extra:
         # Create log directory path
