@@ -7,11 +7,12 @@ from StellaratorDataSet import StellaratorDataSetInverse
 from timeit import default_timer as timer
 from datetime import datetime
 import torch.nn as nn
-from train_pipeline import engine, model_builder, utils, data_setup, predictions
-from train_pipeline.MBuilder.MixtureDensityNetwork import MixtureDensityNetwork, log_sum_exp, mean_log_Gaussian_like
+from train_pipeline import engine, utils, data_setup, predictions
+from train_pipeline.MBuilder import MixtureDensityNetwork
 from torchsummary import summary
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 # Important for num_workers > 0
 if __name__ == "__main__":
@@ -27,16 +28,22 @@ if __name__ == "__main__":
     full_dataset = StellaratorDataSetInverse(npy_file='data/dataset.npy')
 
     # full_dataset = full_dataset.calculate_data_counts(
+    #                         rc1=0,
+    #                         rc2=-10,
+    #                         rc3=-10,
+    #                         zs1=-10,
+    #                         zs2=-10,
+    #                         zs3=-10,
     #                           AXIS_LENGTH=0,
     #                           IOTA_MIN = 0.2,
     #                           MAX_ELONGATION = 100,
     #                           MIN_MIN_L_GRAD_B = 0.01,
     #                           MIN_MIN_R0 = 0.3,
     #                           MIN_R_SINGULARITY = 0,
-    #                           MIN_L_GRAD_GRAD_B = 0.001,
-    #                           MAX_B20_VARIATION = 5,
-    #                           MIN_BETA = 1e-4,
-    #                           MIN_DMERC_TIMES_R2 = 0,
+    #                           MIN_L_GRAD_GRAD_B = 0,
+    #                           MAX_B20_VARIATION = np.finfo(np.float32).max,
+    #                           MIN_BETA = 0,
+    #                           MIN_DMERC_TIMES_R2 = -np.finfo(np.float32).max,
     #                           return_object=True)
 
     # Setup device-agnostic code 
@@ -69,31 +76,28 @@ if __name__ == "__main__":
                                                                     num_workers=NUM_OF_WORKERS
 )
 
-    # Create the model from the model_builder.py
-    # model = model_builder.Model(input_dim=9,
-    #                             output_dim=10
-    # ).to(device)
+    # Create model
     model = MixtureDensityNetwork(input_dim=10,
                                 output_dim=10,
-                                num_gaussians=50
+                                num_gaussians=5
     ).to(device)
 
     # Set up loss function and optimizer
-    # loss_fn = getattr(nn, args.loss_function)()
-    loss_fn = mean_log_Gaussian_like
-    # optimizer = torch.optim.Adam(model.parameters(),
-    #                             lr=LEARING_RATE,
-    #                             weight_decay=WEIGHT_DECAY
-    # )
-    optimizer=torch.optim.RMSprop(model.parameters(),
-                                  lr=LEARNING_RATE,
-                                  alpha=0.9, eps=1e-07,
-                                  weight_decay=WEIGHT_DECAY,
-                                  momentum=MOMENTUM, centered=False)
+    loss_fn = model.mean_log_Laplace_like
+    optimizer = torch.optim.Adam(model.parameters(),
+                                lr=LEARNING_RATE,
+                                weight_decay=WEIGHT_DECAY
+    )
+    # optimizer=torch.optim.RMSprop(model.parameters(),
+    #                               lr=LEARNING_RATE,
+    #                               alpha=0.9, eps=1e-07,
+    #                               weight_decay=WEIGHT_DECAY,
+    #                               momentum=MOMENTUM, centered=False)
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",
                                 model_name=model.__class__.__name__,
+                                timestamp=current_date
     )
     # # Add Model Architecture to TensorBoard
     # writer.add_text("Model Summary", str(model))
@@ -157,7 +161,10 @@ if __name__ == "__main__":
     )
 
     # Loss
-    total_test_loss = nn.MSELoss()(y_pred, y_true).item()
+    total_test_loss = nn.HuberLossLoss()(y_pred, y_true).item()
+
+    # Add Loss to TensorBoard
+    writer.add_scalar("Test Loss", total_test_loss, global_step="HuberLossLoss")
 
     # Confusion Matrix
     confuse = predictions.nfp_confusion_matrix(
@@ -167,6 +174,10 @@ if __name__ == "__main__":
                             std_labels=mean_std["std_labels"]
     )
 
+    # Add Confusion Matrix to TensorBoard
+    writer.add_figure("Confusion Matrix", confuse)
+
+    # Add Distributions of Means to TensorBoard
     for i in range(10):
         distribution_hist = predictions.distribution_hist(y_true,
                                                           y_pred,
@@ -176,7 +187,3 @@ if __name__ == "__main__":
                                                           mean_std["std_labels"][i]
         )
         writer.add_figure(f"Distribution of {full_dataset.labels_names[i]} ", distribution_hist)
-
-    
-    # Add Confusion Matrix to TensorBoard
-    writer.add_figure("Confusion Matrix", confuse)
