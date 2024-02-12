@@ -166,15 +166,19 @@ def distribution_hist(y_true: torch.tensor,
 
     # Renormalize the predictions
     y_pred = y_pred[:, variable_index] * std + mean
+    if variable_index == 6:
+        y_pred = torch.round(y_pred)
     y_pred = y_pred.detach().numpy()
 
     y_true = y_true[:, variable_index] * std + mean
     y_true = y_true.detach().numpy()
 
+
     # Create a figure
     figure = plt.figure(figsize=(8, 8))
     sns.histplot(y_true, color="blue", kde=True, label="True", stat="density")
     sns.histplot(y_pred, color="red", kde=True, label="Predicted", stat="density")
+    plt.xlim(np.min(y_true), np.max(y_true))
     plt.legend()
     plt.title(f"Distribution of {variable_name}")
 
