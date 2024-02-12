@@ -1,1 +1,2 @@
 from .MixtureDensityNetwork import MixtureDensityNetwork
+from .ForwardNeuralNetwork import ForwardNeuralNetwork
