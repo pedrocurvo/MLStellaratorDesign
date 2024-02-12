@@ -13,7 +13,8 @@ def create_dataloaders(
     train_size: float,
     val_size: float,
     batch_size: int, 
-    num_workers: int=0
+    num_workers: int=0,
+    normalise: bool = True
 ):
     """
     Create train and test data loaders for a given dataset.
@@ -64,9 +65,10 @@ def create_dataloaders(
     set_dataset_statistics(test_dataset.dataset, mean, mean_labels, std, std_labels, max, max_labels, min, min_labels)
 
     # Preprocess the data
-    train_dataset.dataset.transform = norm
-    val_dataset.dataset.transform = norm
-    test_dataset.dataset.transform = norm
+    if normalise:
+        train_dataset.dataset.transform = norm
+        val_dataset.dataset.transform = norm
+        test_dataset.dataset.transform = norm
 
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
