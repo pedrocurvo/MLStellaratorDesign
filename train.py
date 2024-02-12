@@ -23,6 +23,9 @@ if __name__ == "__main__":
     now = datetime.now()
     current_date = now.strftime("%Y_%m_%d_%H_%M_%S")
 
+    # Download the dataset
+    data_setup.download_data('data/dataset.csv')
+
     # Dataset
     # Load the data
     full_dataset = StellaratorDataSetInverse(npy_file='data/dataset.npy')
@@ -83,7 +86,7 @@ if __name__ == "__main__":
     ).to(device)
 
     # Set up loss function and optimizer
-    loss_fn = model.mean_log_Laplace_like
+    loss_fn = model.mean_log_Gaussian_like
     optimizer = torch.optim.Adam(model.parameters(),
                                 lr=LEARNING_RATE,
                                 weight_decay=WEIGHT_DECAY
@@ -99,8 +102,7 @@ if __name__ == "__main__":
                                 model_name=model.__class__.__name__,
                                 timestamp=current_date
     )
-    # # Add Model Architecture to TensorBoard
-    # writer.add_text("Model Summary", str(model))
+
     # Add Hyperparameters to TensorBoard
     writer.add_hparams({"batch_size": BATCH_SIZE,
                         "num_epochs": NUM_EPOCHS,
@@ -159,12 +161,6 @@ if __name__ == "__main__":
     y_true, y_pred = model.predict(test_dataloader,
                                     device
     )
-
-    # Loss
-    total_test_loss = nn.HuberLossLoss()(y_pred, y_true).item()
-
-    # Add Loss to TensorBoard
-    writer.add_scalar("Test Loss", total_test_loss, global_step="HuberLossLoss")
 
     # Confusion Matrix
     confuse = predictions.nfp_confusion_matrix(

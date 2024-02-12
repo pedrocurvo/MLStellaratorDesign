@@ -6,6 +6,56 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import random_split
 from .utils import norm, set_dataset_statistics
+import os
+import requests
+from tqdm import tqdm
+from pathlib import Path
+
+def download_data(file_path: str, doi: str = '10651537', size: int = 2.42e9):
+    """
+    Download the dataset from Zenodo.
+    """
+    if not os.path.exists(file_path):
+        # Print a message to the console
+        print("Downloading dataset...")
+
+        # Create the directory to save the dataset
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+        # Construct the Zenodo API URL for the dataset metadata
+        api_url = f'https://zenodo.org/api/records/{doi}'
+
+        # Send a GET request to the API to fetch dataset metadata
+        response = requests.get(api_url)
+        data = response.json()
+
+        # Extract the download URL from the dataset metadata
+        download_url = data['files'][0]['links']['self']
+
+        # Send a GET request to the download URL with stream=True to enable streaming
+        response = requests.get(download_url, stream=True)
+
+        # Get the total file size in bytes
+        total_size = int(response.headers.get('content-length', size))
+
+        # Define the chunk size for streaming (1 KB)
+        chunk_size = 1024
+
+        # Open a file to save the dataset
+        with open(file_path, 'wb') as f:
+            # Use tqdm to create a progress bar
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc='Downloading') as pbar:
+                # Iterate over the response content in chunks and write to file
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
+                    # Update the progress bar
+                    pbar.update(len(chunk))
+
+        print("Converting dataset to .npy format...")
+        os.system(f"python3 CSVtoNumpyConverter.py {file_path}")
+        print("Dataset downloaded successfully.")
+    else:
+        print("Dataset already exists.")
 
 
 def create_dataloaders(
