@@ -151,7 +151,6 @@ def nfp_confusion_matrix(y_true: torch.tensor,
     # NFP go from 1 to 10, so we need to shift the ticks
     plt.xticks(tick_marks, np.arange(1, 11))
     plt.yticks(tick_marks, np.arange(1, 11))
-    plt.show()
 
     return figure
 
