@@ -41,8 +41,8 @@ class MixtureDensityNetwork(nn.Module):
         sigmas = nn.ELU(alpha=1.)(self.sigma(x)) + 1 + 1e-8
         #sigmas = nn.Softplus()(self.sigma(x)) + 1e-6
         # Pi
-        pis = F.gumbel_softmax(self.pi(x))
-        #pis = F.softmax(self.pi(x), dim=1)
+        # pis = F.gumbel_softmax(self.pi(x))
+        pis = F.softmax(self.pi(x), dim=1)
 
         # Concatenate the outputs
         res = torch.cat([mus, sigmas, pis], dim=1)
