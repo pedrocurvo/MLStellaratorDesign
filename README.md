@@ -15,25 +15,32 @@ The project is structured as follows:
 
 ```
 .
+├── generate.py
+├── CSVtoNumpyConverter.py
 ├── data
 │   ├── dataset.csv
 │   └── dataset.npy
-├── models
-├── runs
+├── StellatorsDataSet
+│   ├── __init__.py
+│   ├── StellaratorsDataSetDirect.py
+│   └── StellaratorsDataSetInverse.py
 ├── train_pipeline
 │   ├── data_setup.py
 │   ├── engine.py
-│   ├── model_builder.py
+│   ├── MBuilder
+│   │   ├── __init__.py
+│   │   ├── MixtureDensityNetwork.py
+│   │   └── ForwardNeuralNetwork.py
 │   ├── utils.py
 │   └── predictions.py
+├── models
+├── runs
 ├── train.py
-├── CSVtoNumpyConverter.py
-├── StellatorsDataSet.py
-├── generate.py
 ├── resources 
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
+├── IDEAS.md
 └── README.md
 ```
 
