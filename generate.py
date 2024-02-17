@@ -29,7 +29,7 @@ logger3.warning = warning
 DATA_DIR = Path('data')
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-fname = DATA_DIR.joinpath('try_dataset.csv')
+fname = DATA_DIR.joinpath('dataset.csv')
 
 # -----------------------------------------------------------------------------
 # open the output file for writing or appending
@@ -52,31 +52,30 @@ else:
 # -----------------------------------------------------------------------------
 # keep generating until keyboard interrupt
 
-with tqdm(total=float('inf'), desc='Data Counter', initial=n_prev) as pbar:
+with tqdm(total=float('inf'), desc='Data counter', initial=n_prev) as pbar:
     while True:
-
-        rc1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
-        rc2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc1))
-        rc3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc2))
-
-        zs1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
-        zs2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs1))
-        zs3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs2))
-
-        rc = [1., rc1, rc2, rc3]
-        zs = [0., zs1, zs2, zs3]
-
-        nfp = np.random.randint(1, 11)
-
-        etabar = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
-
-        B2c = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
-
-        p2 = (-1.) * np.random.uniform(0., 4e6)
-
-        order = 'r2'
-
         try:
+            rc1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
+            rc2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc1))
+            rc3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc2))
+
+            zs1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
+            zs2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs1))
+            zs3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs2))
+
+            rc = [1., rc1, rc2, rc3]
+            zs = [0., zs1, zs2, zs3]
+
+            nfp = np.random.randint(1, 11)
+
+            etabar = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
+
+            B2c = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
+
+            p2 = (-1.) * np.random.uniform(0., 4e6)
+
+            order = 'r2'
+
             stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order=order)
 
             axis_length    = stel.axis_length

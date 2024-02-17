@@ -3,7 +3,6 @@ import time
 from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.utils import plot_model
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
@@ -27,12 +26,6 @@ def create_model(input_dim, output_dim):
             loc=t[...,:output_dim],
             scale_tril=FillScaleTriL(diag_bijector=Exp(),
                                      diag_shift=None).forward(t[...,output_dim:]))))
-
-    model.summary()
-    
-    fname = 'model.png'
-    print('Writing:', fname)
-    plot_model(model, to_file=fname, show_shapes=True, show_layer_names=False)
 
     opt = Adam(1e-4)
     loss = lambda y, rv: -rv.log_prob(y)

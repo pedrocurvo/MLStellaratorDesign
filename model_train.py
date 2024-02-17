@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 from model import create_model, callback
 
 # -----------------------------------------------------------------------------
 
-fname = 'dataset.csv'
+fname = Path('data').joinpath('dataset.csv')
 print('Reading:', fname)
 df = pd.read_csv(fname)
 
@@ -31,6 +33,8 @@ input_dim = X.shape[1]
 output_dim = Y.shape[1]
 
 model = create_model(input_dim, output_dim)
+
+model.summary()
 
 # -----------------------------------------------------------------------------
 
