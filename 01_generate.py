@@ -1,40 +1,35 @@
-import os
-import time
+import warnings
 import numpy as np
 import pandas as pd
+
+from pathlib import Path
 from tqdm import tqdm
 
 from qsc import Qsc
 from qsc.util import mu0, fourier_minimum
+from qsc.newton import logger as logger1
+from qsc.calculate_r2 import logger as logger2
+from qsc.calculate_r3 import logger as logger3
 
 # -----------------------------------------------------------------------------
 # set up warning behavior, turn warnings into exceptions
 
-import warnings
 warnings.filterwarnings('error')
 
 def warning(msg, *args, **kwargs):
     raise RuntimeWarning(msg)
 
-from qsc.newton import logger as logger1
-from qsc.calculate_r2 import logger as logger2
-from qsc.calculate_r3 import logger as logger3
-
 logger1.warning = warning
 logger2.warning = warning
 logger3.warning = warning
 
-
 # -----------------------------------------------------------------------------
 # set up the output directory, and the output file
-
-from pathlib import Path
 
 DATA_DIR = Path('data')
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 fname = DATA_DIR.joinpath('try_dataset.csv')
-
 
 # -----------------------------------------------------------------------------
 # open the output file for writing or appending
@@ -126,7 +121,6 @@ with tqdm(total=float('inf'), desc='Data Counter', initial=n_prev) as pbar:
 
         except KeyboardInterrupt:
             break
-    
 
 print()
 
@@ -136,10 +130,8 @@ print()
 f.close()
 
 # -----------------------------------------------------------------------------
-# try reading the file to check the results
+# try reading the file
 
 df = pd.read_csv(fname)
 if len(df) > 0:
     print(df)
-
-# -----------------------------------------------------------------------------
