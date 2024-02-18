@@ -121,6 +121,6 @@ The probabilistic model is a multivariate normal distribution parameterized by a
 
 2. Train the model by running `model_train.py`. The model weights will be saved in `model_weights.h5`.
 
-3. Use the model to predict "good" stellarators by running `model_predict.py`. The results will be saved in `data/predict.csv`.
+3. Predict "good" stellarators by running `model_predict.py`. The results will be saved in `data/predict.csv`.
 
 The script `qsc_sampling.py` contains supporting routines for `generate.py` and `model_predict.py`.
