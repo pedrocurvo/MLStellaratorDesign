@@ -35,6 +35,18 @@ def create_model(input_dim, output_dim):
 
 # -----------------------------------------------------------------------------
 
+def save_weights(model):
+    fname = 'model_weights.h5'
+    print('Writing:', fname)
+    model.save_weights(fname)    
+
+def load_weights(model):
+    fname = 'model_weights.h5'
+    print('Reading:', fname)
+    model.load_weights(fname)
+
+# -----------------------------------------------------------------------------
+
 class callback(Callback):
     
     def on_train_begin(self, logs=None):

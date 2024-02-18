@@ -1,27 +1,10 @@
-import warnings
 import numpy as np
 import pandas as pd
 
 from pathlib import Path
 from tqdm import tqdm
 
-from qsc import Qsc
-from qsc.util import mu0, fourier_minimum
-from qsc.newton import logger as logger1
-from qsc.calculate_r2 import logger as logger2
-from qsc.calculate_r3 import logger as logger3
-
-# -----------------------------------------------------------------------------
-# set up warning behavior, turn warnings into exceptions
-
-warnings.filterwarnings('error')
-
-def warning(msg, *args, **kwargs):
-    raise RuntimeWarning(msg)
-
-logger1.warning = warning
-logger2.warning = warning
-logger3.warning = warning
+from sampling import sample_input, run_qsc
 
 # -----------------------------------------------------------------------------
 # set up the output directory, and the output file
@@ -35,93 +18,49 @@ fname = DATA_DIR.joinpath('dataset.csv')
 # open the output file for writing or appending
 
 if not fname.exists():
-    n_prev = 0
+    initial = 0
     f = open(fname, 'w')
-    fields = ['rc1', 'rc2', 'rc3', 'zs1', 'zs2', 'zs3',
-              'nfp', 'etabar', 'B2c', 'p2', 'axis_length',
-              'iota', 'max_elongation', 'min_L_grad_B',
-              'min_R0', 'r_singularity', 'L_grad_grad_B',
-              'B20_variation', 'beta', 'DMerc_times_r2']
+    fields_sample = ['rc1', 'rc2', 'rc3',
+                     'zs1', 'zs2', 'zs3',
+                     'nfp', 'etabar', 'B2c', 'p2']
+    fields_output = ['axis_length', 'iota', 'max_elongation',
+                     'min_L_grad_B', 'min_R0', 'r_singularity',
+                     'L_grad_grad_B', 'B20_variation', 'beta',
+                     'DMerc_times_r2']
+    fields = fields_sample + fields_output
     print(','.join(fields), file=f)
-
 else:
-    df = pd.read_csv(fname)
-    n_prev = df.shape[0]
+    initial = pd.read_csv(fname).shape[0]
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
 # keep generating until keyboard interrupt
 
-with tqdm(total=float('inf'), desc='Data counter', initial=n_prev) as pbar:
-    while True:
-        try:
-            rc1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
-            rc2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc1))
-            rc3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(rc2))
+pbar = tqdm(total=np.inf, desc='Data counter', initial=initial)
 
-            zs1 = np.random.choice([-1., 1.]) * np.random.uniform(0., 1.)
-            zs2 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs1))
-            zs3 = np.random.choice([-1., 1.]) * np.random.uniform(0., np.fabs(zs2))
+while True:
+    try:
+        sample = sample_input()
+        output = run_qsc(sample)
 
-            rc = [1., rc1, rc2, rc3]
-            zs = [0., zs1, zs2, zs3]
+        assert not np.isnan(output).any()
+        assert not np.isinf(output).any()
+        assert not (np.fabs(output) > np.finfo(np.float32).max).any()
 
-            nfp = np.random.randint(1, 11)
+        values = np.concatenate([sample, output], dtype=str)
+        print(','.join(values), file=f)
+        pbar.update(1)
 
-            etabar = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
+    except Warning:
+        continue
 
-            B2c = np.random.choice([-1., 1.]) * np.random.uniform(0.01, 3.)
+    except AssertionError:
+        continue
 
-            p2 = (-1.) * np.random.uniform(0., 4e6)
+    except KeyboardInterrupt:
+        break
 
-            order = 'r2'
-
-            stel = Qsc(rc=rc, zs=zs, nfp=nfp, etabar=etabar, B2c=B2c, p2=p2, order=order)
-
-            axis_length    = stel.axis_length
-            iota           = stel.iota
-            max_elongation = stel.max_elongation
-            min_L_grad_B   = stel.min_L_grad_B
-            min_R0         = stel.min_R0
-            r_singularity  = stel.r_singularity
-            L_grad_grad_B  = fourier_minimum(stel.L_grad_grad_B)
-            B20_variation  = stel.B20_variation
-            beta           = -mu0 * p2 * stel.r_singularity**2 / stel.B0**2
-            DMerc_times_r2 = stel.DMerc_times_r2
-
-            # assert np.fabs(iota) >= 0.2
-            # assert max_elongation <= 10.
-            # assert np.fabs(min_L_grad_B) >= 0.1
-            # assert np.fabs(min_R0) >= 0.3
-            # assert r_singularity >= 0.05
-            # assert np.fabs(L_grad_grad_B) >= 0.1
-            # assert B20_variation <= 5.
-            # assert beta >= 1e-4
-            # assert DMerc_times_r2 > 0.
-
-            values = np.array([rc1, rc2, rc3, zs1, zs2, zs3,
-                            nfp, etabar, B2c, p2, axis_length,
-                            iota, max_elongation, min_L_grad_B,
-                            min_R0, r_singularity, L_grad_grad_B,
-                            B20_variation, beta, DMerc_times_r2])
-
-            assert not np.isnan(values).any()
-            assert not np.isinf(values).any()
-            assert not (np.fabs(values) > np.finfo(np.float32).max).any()
-
-            print(','.join(values.astype(str)), file=f)
-            pbar.update(1)
-
-        except Warning:
-            continue
-
-        except AssertionError:
-            continue
-
-        except KeyboardInterrupt:
-            break
-
-print()
+pbar.close()
 
 # -----------------------------------------------------------------------------
 # close the output file
