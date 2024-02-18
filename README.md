@@ -6,6 +6,7 @@
   - [Project Description](#project-description)
   - [Project Architecture Overview](#project-architecture-overview)
   - [How to run the code](#how-to-run-the-code)
+  - [Probabilistic model](#probabilistic-model)
 
 ## Project Description
 The design of fusion reactors with a stellarator configuration can be enormously simplified using a framework called the near-axis expansion. A Python code that leverages such simplification has been developed that is now routinely used to design new machines. From a set of input parameters, the code produces a new design, which can be assessed in terms of its characteristics, such as confinement and complexity of the geometry. However, to achieve a design with certain characteristics, one must find the appropriate input parameters. The goal of this work is to use machine learning, e.g. a neural network, to map the desired characteristics of the device to the corresponding parameters required to generate the device. This includes the development of a dataset of configurations and the training of the neural network on such dataset.
@@ -111,3 +112,15 @@ The project is structured as follows:
 
 8. Alternatively, if you are using VSCode, you can install the TensorBoard extension and visualize the tensorboard log directly in VSCode by
 pressing ```Cmd+Shift+P``` and typing ```Python: Launch TensorBoard ``` and selecting the dir or log you want to visualize.
+
+## Probabilistic model
+
+The probabilistic model is a multivariate normal parameterized by a neural network (see `model.py`).
+
+1. Generate the training data by running `generate.py`. This will generate a dataset in `data/dataset.csv`.
+
+2. Train the model by running `model_train.py`. The model weights will be saved in `model_weights.h5`.
+
+3. Use the model to predict "good" stellarators by running `model_predict.py`. The results will be saved in `data/predict.csv`.
+
+The script `qsc_sampling.py` contains supporting routines for `generate.py` and `model_predict.py`.
