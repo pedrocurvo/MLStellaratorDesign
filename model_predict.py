@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 
 from model import create_model, load_weights
-from sampling import sample_output, round_nfp, run_qsc, check_criteria
+from qsc_sampling import sample_output, round_nfp, run_qsc, check_criteria
 
 # -----------------------------------------------------------------------------
 
@@ -64,6 +64,7 @@ while True:
         X_batch = np.array([sample_output(df) for _ in range(batch_size)])
         X_batch = X_batch - X_mean
         X_batch = X_batch / X_std
+        X_batch = X_batch.astype(np.float32)
 
         Y_batch = model.predict(X_batch, batch_size=batch_size, verbose=0)
         Y_batch = Y_batch * Y_std
