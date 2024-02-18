@@ -115,7 +115,7 @@ pressing ```Cmd+Shift+P``` and typing ```Python: Launch TensorBoard ``` and sele
 
 ## Probabilistic model
 
-The probabilistic model is a multivariate normal parameterized by a neural network (see `model.py`).
+The probabilistic model is a multivariate normal distribution parameterized by a neural network (see `model.py`).
 
 1. Generate the training data by running `generate.py`. This will generate a dataset in `data/dataset.csv`.
 
