@@ -33,20 +33,15 @@ def create_model(input_dim, output_dim):
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
-        cat=Categorical(logits=t[...,:K],
-                        validate_args=False,
-                        allow_nan_stats=True),
+        cat=Categorical(logits=t[...,:K]),
         # parameterized components
         components=[MultivariateNormalTriL(
-            # parameterized mean of each component
+            # parameterized mean for the component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
-            # parameterized covariance of each component
+            # parameterized covariance for the component
             scale_tril=FillScaleTriL().forward(
-                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
-            validate_args=False,
-            allow_nan_stats=True) for i in range(K)],
-        validate_args=False,
-        allow_nan_stats=True)))
+                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
+                    for i in range(K)])))
 
     # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
