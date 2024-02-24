@@ -1,9 +1,10 @@
 import time
+import numpy as np
 
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
-from keras.layers import Input, Dense, Lambda
+from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
@@ -33,15 +34,20 @@ def create_model(input_dim, output_dim):
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
-        cat=Categorical(probs=tf.nn.softmax(t[...,:K])),
+        cat=Categorical(probs=tf.nn.softmax(t[...,:K]),
+                        validate_args=False,
+                        allow_nan_stats=True,),
         # parameterized components
         components=[MultivariateNormalTriL(
             # parameterized mean of each component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
-                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
-            for i in range(K)])))
+                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
+            validate_args=False,
+            allow_nan_stats=True) for i in range(K)],
+        validate_args=True,
+        allow_nan_stats=False)))
 
     # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
@@ -83,7 +89,7 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f *' % (t, epoch, loss, val_loss))
         else:
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
-        if epoch > 2*self.min_val_epoch:
+        if (epoch > 2*self.min_val_epoch) or np.isnan(loss) or np.isnan(val_loss):
             print('Stop training.')
             self.model.stop_training = True
 
