@@ -35,8 +35,8 @@ def create_model(input_dim, output_dim):
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
         cat=Categorical(probs=tf.nn.softmax(t[...,:K]),
-                        validate_args=False,
-                        allow_nan_stats=True,),
+                        validate_args=True,
+                        allow_nan_stats=False),
         # parameterized components
         components=[MultivariateNormalTriL(
             # parameterized mean of each component
@@ -44,8 +44,8 @@ def create_model(input_dim, output_dim):
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
-            validate_args=False,
-            allow_nan_stats=True) for i in range(K)],
+            validate_args=True,
+            allow_nan_stats=False) for i in range(K)],
         validate_args=True,
         allow_nan_stats=False)))
 
