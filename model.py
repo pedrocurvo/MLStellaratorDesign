@@ -1,32 +1,49 @@
 import time
 
+import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Input, Dense, Lambda
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
 from tensorflow_probability.python.layers import DistributionLambda
-from tensorflow_probability.python.distributions import MultivariateNormalTriL
-from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
+from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
+from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
 def create_model(input_dim, output_dim):
     model = Sequential()
 
-    model.add(Dense(256, activation='tanh', input_dim=input_dim))
-    model.add(Dense(256, activation='tanh'))
+    # neural network
+    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
+    model.add(Dense(2048, activation='tanh'))
+    
+    # number of parameters for each component of the mixture model
+    loc_size = output_dim
+    scale_size = output_dim * (output_dim + 1) // 2
+    params_size = loc_size + scale_size
 
-    units = output_dim + output_dim * (output_dim + 1) // 2
+    # number of components for the mixture model
+    K = 10
+    units = K + K * params_size
     model.add(Dense(units))
 
-    model.add(DistributionLambda(
-        make_distribution_fn=lambda t: MultivariateNormalTriL(
-            loc=t[...,:output_dim],
-            scale_tril=FillScaleTriL(diag_bijector=Exp(),
-                                     diag_shift=None).forward(t[...,output_dim:]))))
+    # mixture model
+    model.add(DistributionLambda(lambda t: Mixture(
+        # parameterized categorical for component selection
+        cat=Categorical(probs=tf.nn.softmax(t[...,:K])),
+        # parameterized components
+        components=[MultivariateNormalTriL(
+            # parameterized mean of each component
+            loc=t[...,K+i*params_size:K+i*params_size+loc_size],
+            # parameterized covariance of each component
+            scale_tril=FillScaleTriL().forward(
+                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
+            for i in range(K)])))
 
+    # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
