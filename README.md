@@ -123,4 +123,4 @@ The probabilistic model is a multivariate normal distribution parameterized by a
 
 3. Predict "good" stellarators by running `model_predict.py`. The results will be saved in `data/predict.csv`.
 
-The script `qsc_sampling.py` contains supporting routines for `generate.py` and `model_predict.py`.
+The script `sampling.py` contains supporting routines for `generate.py` and `model_predict.py`.

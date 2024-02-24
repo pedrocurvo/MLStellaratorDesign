@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 
-from qsc_sampling import sample_input, run_qsc
+from sampling import sample_input, run_qsc
 
 # -----------------------------------------------------------------------------
 # set up the output directory, and the output file

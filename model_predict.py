@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 
 from model import create_model, load_weights
-from qsc_sampling import sample_output, round_nfp, run_qsc, check_criteria
+from sampling import sample_output, round_nfp, run_qsc, check_criteria
 
 # -----------------------------------------------------------------------------
 
