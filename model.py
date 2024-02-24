@@ -1,7 +1,6 @@
 import time
 import numpy as np
 
-import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
@@ -15,6 +14,9 @@ from tensorflow_probability.python.bijectors import FillScaleTriL
 # -----------------------------------------------------------------------------
 
 def create_model(input_dim, output_dim):
+    validate_args = False
+    allow_nan_stats = False
+
     model = Sequential()
 
     # neural network
@@ -34,9 +36,9 @@ def create_model(input_dim, output_dim):
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
-        cat=Categorical(probs=tf.nn.softmax(t[...,:K]),
-                        validate_args=True,
-                        allow_nan_stats=False),
+        cat=Categorical(logits=t[...,:K],
+                        validate_args=validate_args,
+                        allow_nan_stats=allow_nan_stats),
         # parameterized components
         components=[MultivariateNormalTriL(
             # parameterized mean of each component
@@ -44,10 +46,10 @@ def create_model(input_dim, output_dim):
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
-            validate_args=True,
-            allow_nan_stats=False) for i in range(K)],
-        validate_args=True,
-        allow_nan_stats=False)))
+            validate_args=validate_args,
+            allow_nan_stats=allow_nan_stats) for i in range(K)],
+        validate_args=validate_args,
+        allow_nan_stats=allow_nan_stats)))
 
     # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
