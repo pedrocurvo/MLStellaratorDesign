@@ -30,7 +30,7 @@ def create_model(input_dim, output_dim):
     units = K + K * params_size
     model.add(Dense(units))
     
-    # protect agains numerical issues
+    # protect against numerical issues
     low = np.ceil(np.log(np.finfo(np.float32).resolution))
     high = np.floor(np.log(np.finfo(np.float32).max))
     model.add(Lambda(lambda t: clip_by_value_preserve_gradient(t, low, high)))
