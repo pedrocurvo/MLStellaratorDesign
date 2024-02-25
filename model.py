@@ -1,15 +1,15 @@
 import time
 import numpy as np
 
-from tensorflow import keras
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Lambda
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
+from tensorflow_probability.python.math import clip_by_value_preserve_gradient
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
-from tensorflow_probability.python.bijectors import FillScaleTriL
+from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
 
 # -----------------------------------------------------------------------------
 
@@ -17,8 +17,8 @@ def create_model(input_dim, output_dim):
     model = Sequential()
 
     # neural network
-    model.add(Dense(2048, activation='relu', input_dim=input_dim))
-    model.add(Dense(2048, activation='relu'))
+    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
+    model.add(Dense(2048, activation='tanh'))
     
     # number of parameters for each component of the mixture model
     loc_size = output_dim
@@ -29,10 +29,15 @@ def create_model(input_dim, output_dim):
     K = 10
     units = K + K * params_size
     model.add(Dense(units))
+    
+    # protect agains numerical issues
+    low = np.ceil(np.log(np.finfo(np.float32).resolution))
+    high = np.floor(np.log(np.finfo(np.float32).max))
+    model.add(Lambda(lambda t: clip_by_value_preserve_gradient(t, low, high)))
 
-    # debugging
-    validate_args = True
-    allow_nan_stats = False
+    # change for debugging
+    validate_args = False
+    allow_nan_stats = True
 
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
@@ -45,7 +50,8 @@ def create_model(input_dim, output_dim):
             # parameterized mean of each component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
-            scale_tril=FillScaleTriL().forward(
+            scale_tril=FillScaleTriL(diag_bijector=Exp(),
+                                     diag_shift=None).forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats) for i in range(K)],
