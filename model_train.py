@@ -3,7 +3,7 @@ import pandas as pd
 
 from pathlib import Path
 
-from model import create_model, save_weights, callback
+from model import create_model, load_weights, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
@@ -41,6 +41,8 @@ input_dim = dim
 output_dim = dim
 
 model = create_model(input_dim, output_dim)
+
+load_weights(model)
 
 model.summary()
 
