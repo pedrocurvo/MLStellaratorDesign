@@ -1,12 +1,12 @@
 import time
 import numpy as np
+import tensorflow as tf
 
 from keras.models import Sequential
 from keras.layers import Dense, Lambda
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
-from tensorflow_probability.python.math import clip_by_value_preserve_gradient
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
 from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
@@ -31,9 +31,7 @@ def create_model(input_dim, output_dim):
     model.add(Dense(units))
     
     # protect against numerical issues
-    low = np.ceil(np.log(np.finfo(np.float32).resolution))
-    high = np.floor(np.log(np.finfo(np.float32).max))
-    model.add(Lambda(lambda t: clip_by_value_preserve_gradient(t, low, high)))
+    model.add(Lambda(lambda t: tf.clip_by_value(t, -10., 10.)))
 
     # change for debugging
     validate_args = False
