@@ -17,8 +17,8 @@ def create_model(input_dim, output_dim):
     model = Sequential()
 
     # neural network
-    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
-    model.add(Dense(2048, activation='tanh'))
+    model.add(Dense(2048, activation='relu', input_dim=input_dim))
+    model.add(Dense(2048, activation='relu'))
     
     # number of parameters for each component of the mixture model
     loc_size = output_dim
