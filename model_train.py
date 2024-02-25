@@ -42,8 +42,6 @@ output_dim = dim
 
 model = create_model(input_dim, output_dim)
 
-load_weights(model)
-
 model.summary()
 
 # -----------------------------------------------------------------------------
