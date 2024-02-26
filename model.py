@@ -4,12 +4,13 @@ import tensorflow as tf
 
 from keras.models import Sequential
 from keras.layers import Dense, Lambda
+from keras.regularizers import L2
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
-from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
+from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
@@ -28,10 +29,11 @@ def create_model(input_dim, output_dim):
     # number of components for the mixture model
     K = 10
     units = K + K * params_size
-    model.add(Dense(units))
+    model.add(Dense(units, activity_regularizer=L2(1e-6)))
     
     # protect against numerical issues
-    model.add(Lambda(lambda t: tf.clip_by_value(t, -10., 10.)))
+    clip_max = np.floor(np.log(np.finfo(np.float32).max))
+    model.add(Lambda(lambda t: tf.clip_by_value(t, -clip_max, clip_max)))
 
     # change for debugging
     validate_args = False
