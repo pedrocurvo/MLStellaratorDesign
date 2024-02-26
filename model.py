@@ -48,8 +48,7 @@ def create_model(input_dim, output_dim):
             # parameterized mean of each component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
-            scale_tril=FillScaleTriL(diag_bijector=Exp(),
-                                     diag_shift=None).forward(
+            scale_tril=FillScaleTriL().forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats) for i in range(K)],
