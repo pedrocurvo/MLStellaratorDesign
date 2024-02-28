@@ -45,6 +45,7 @@ def create_model(input_dim, output_dim):
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
         cat=Categorical(logits=t[...,:K],
+                        # debugging
                         validate_args=validate_args,
                         allow_nan_stats=allow_nan_stats),
         # parameterized components
@@ -54,8 +55,10 @@ def create_model(input_dim, output_dim):
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
+            # debugging
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats) for i in range(K)],
+        # debugging
         validate_args=validate_args,
         allow_nan_stats=allow_nan_stats)))
 
