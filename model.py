@@ -13,6 +13,13 @@ from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
+def loss_fn(y, rv):
+    nll = -rv.log_prob(y)
+    nll = tf.boolean_mask(nll, ~tf.math.is_nan(nll))
+    return nll
+
+# -----------------------------------------------------------------------------
+
 def create_model(input_dim, output_dim):
     model = Sequential()
 
@@ -54,9 +61,8 @@ def create_model(input_dim, output_dim):
 
     # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
-    loss = lambda y, rv: -rv.log_prob(y)
-    model.compile(optimizer=opt, loss=loss)
-    
+    model.compile(optimizer=opt, loss=loss_fn)
+
     return model
 
 # -----------------------------------------------------------------------------
