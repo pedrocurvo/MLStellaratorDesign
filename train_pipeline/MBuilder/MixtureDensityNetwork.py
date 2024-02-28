@@ -38,8 +38,8 @@ class MixtureDensityNetwork(nn.Module):
         # Sigma should be positive and we want values far from 0
         # since in distributions close to 0 can cause numerical instability. Hence we use a modified
         # ELU activation function
-        sigmas = nn.ELU(alpha=1.)(self.sigma(x)) + 1 + 1e-8
-        #sigmas = nn.Softplus()(self.sigma(x)) + 1e-6
+        #sigmas = nn.ELU(alpha=1.)(self.sigma(x)) + 1 + 1e-8
+        sigmas = nn.Softplus()(self.sigma(x)) + 1e-6
         # Pi
         # pis = F.gumbel_softmax(self.pi(x))
         pis = F.softmax(self.pi(x), dim=1)
@@ -115,14 +115,12 @@ class MixtureDensityNetwork(nn.Module):
 
                 # Make predictions
                 parameters = self(features)
-                c=10
-                m=5
                 
                 # Separate the parameters
-                components = parameters.view(-1, c + 2, m)
-                mu_pred = components[:, :c, :]
-                sigma_pred = components[:, c, :]
-                alpha_pred = components[:, c+1, :]
+                components = parameters.view(-1, self.output_dim + 2, self.num_gaussians)
+                mu_pred = components[:, :self.output_dim, :]
+                sigma_pred = components[:, self.output_dim, :]
+                alpha_pred = components[:, self.output_dim + 1, :]
                 # Sort alphas from highest to lower 
                 alpha_pred, indices = torch.sort(alpha_pred, dim=1)
                 alpha_pred = alpha_pred.cpu().numpy()
@@ -161,14 +159,12 @@ class MixtureDensityNetwork(nn.Module):
 
                 # Make predictions
                 parameters = self(features)
-                c=10
-                m=5
                 
                 # Separate the parameters
-                components = parameters.view(-1, c + 2, m)
-                mu_pred = components[:, :c, :]
-                sigma_pred = components[:, c, :]
-                alpha_pred = components[:, c+1, :]
+                components = parameters.view(-1, self.output_dim + 2, self.num_gaussians)
+                mu_pred = components[:, :self.output_dim, :]
+                sigma_pred = components[:, self.output_dim, :]
+                alpha_pred = components[:, self.output_dim+1, :]
                 # Sort alphas from highest to lower 
                 alpha_pred, indices = torch.sort(alpha_pred, dim=1)
                 alpha_pred = alpha_pred.cpu().numpy()
