@@ -3,8 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from keras.models import Sequential
-from keras.layers import Dense, Lambda
-from keras.regularizers import L2
+from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
@@ -32,8 +31,8 @@ def create_model(input_dim, output_dim):
     model.add(Dense(units))
     
     # change for debugging
-    validate_args = True
-    allow_nan_stats = False
+    validate_args = False
+    allow_nan_stats = True
 
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
@@ -47,7 +46,7 @@ def create_model(input_dim, output_dim):
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
-                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
+                -tf.abs(t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size])),
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats) for i in range(K)],
         validate_args=validate_args,
