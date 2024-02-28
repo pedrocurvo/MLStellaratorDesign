@@ -29,15 +29,11 @@ def create_model(input_dim, output_dim):
     # number of components for the mixture model
     K = 10
     units = K + K * params_size
-    model.add(Dense(units, activity_regularizer=L2(1e-6)))
+    model.add(Dense(units))
     
-    # protect against numerical issues
-    clip_max = np.floor(np.log(np.finfo(np.float32).max))
-    model.add(Lambda(lambda t: tf.clip_by_value(t, -clip_max, clip_max)))
-
     # change for debugging
-    validate_args = False
-    allow_nan_stats = True
+    validate_args = True
+    allow_nan_stats = False
 
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
