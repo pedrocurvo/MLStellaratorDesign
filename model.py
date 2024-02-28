@@ -17,8 +17,8 @@ def create_model(input_dim, output_dim):
     model = Sequential()
 
     # neural network
-    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
-    model.add(Dense(2048, activation='tanh'))
+    model.add(Dense(2048, activation='relu', input_dim=input_dim))
+    model.add(Dense(2048, activation='relu'))
     
     # number of parameters for each component of the mixture model
     loc_size = output_dim
@@ -46,7 +46,7 @@ def create_model(input_dim, output_dim):
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
             scale_tril=FillScaleTriL().forward(
-                -tf.abs(t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size])),
+                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
             validate_args=validate_args,
             allow_nan_stats=allow_nan_stats) for i in range(K)],
         validate_args=validate_args,
