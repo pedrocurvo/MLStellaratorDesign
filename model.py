@@ -96,10 +96,11 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f *' % (t, epoch, loss, val_loss))
         else:
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
-#        if (epoch > 2*self.min_val_epoch):
-#            print('Stop training.')
-#            self.model.stop_training = True
+        if (epoch > 2*self.min_val_epoch):
+            print('Stop training.')
+            self.model.stop_training = True
         if np.isnan(loss) or np.isnan(val_loss):
+            print('NaN loss.')
             self.model.stop_training = True
     def get_weights(self):
         return self.min_val_weights
