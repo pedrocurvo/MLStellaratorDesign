@@ -138,6 +138,36 @@ class MixtureDensityNetwork(nn.Module):
 
         return y_true_final, y_pred_final
     
+    def predict_single(self, features, device):
+        """
+        Predict from a single example.
+        """
+        # Set the model to evaluation
+        self.eval()
+        # Turn off gradients
+        with torch.no_grad():
+            # Move the data to the device
+            features = features.to(device)
+
+            # Make predictions
+            parameters = self(features)
+
+            # Separate the parameters
+            components = parameters.view(-1, self.output_dim + 2, self.num_gaussians)
+            mu_pred = components[:, :self.output_dim, :]
+            sigma_pred = components[:, self.output_dim, :]
+            alpha_pred = components[:, self.output_dim + 1, :]
+            # Sort alphas from highest to lower 
+            alpha_pred, indices = torch.sort(alpha_pred, dim=1)
+            alpha_pred = alpha_pred.cpu().numpy()
+            dim = alpha_pred.shape[1]
+            y_pred = np.zeros((len(mu_pred)))  
+            y_pred = np.array([mu_pred[i,:,np.random.choice(dim,p=alpha_pred[i])]  
+                for i in np.arange(len(alpha_pred))])  
+            y_pred = torch.tensor(y_pred).to(device)
+
+        return y_pred
+    
     def distribution_of_means(self, dataloader, device, num):
         """
         Predict from a dataloader and yield the results.
