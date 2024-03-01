@@ -9,7 +9,7 @@ from keras.callbacks import Callback
 
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
-from tensorflow_probability.python.bijectors import FillScaleTriL, Softplus
+from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
@@ -17,8 +17,8 @@ def create_model(input_dim, output_dim):
     model = Sequential()
 
     # neural network
-    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
-    model.add(Dense(2048, activation='tanh'))
+    model.add(Dense(2048, activation='relu', input_dim=input_dim))
+    model.add(Dense(2048, activation='relu'))
     
     # number of parameters for each component of the mixture model
     loc_size = output_dim
@@ -30,31 +30,18 @@ def create_model(input_dim, output_dim):
     units = K + K * params_size
     model.add(Dense(units, activation='tanh'))
     
-    # arguments for debugging
-    validate_args = False
-    allow_nan_stats = True
-
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
         # parameterized categorical for component selection
-        cat=Categorical(logits=t[...,:K],
-                        # arguments for debugging
-                        validate_args=validate_args,
-                        allow_nan_stats=allow_nan_stats),
+        cat=Categorical(logits=t[...,:K]),
         # parameterized components
         components=[MultivariateNormalTriL(
             # parameterized mean of each component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
-            scale_tril=FillScaleTriL(diag_bijector=Softplus(),
-                                     diag_shift=None).forward(
-                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]),
-            # arguments for debugging
-            validate_args=validate_args,
-            allow_nan_stats=allow_nan_stats) for i in range(K)],
-        # arguments for debugging
-        validate_args=validate_args,
-        allow_nan_stats=allow_nan_stats)))
+            scale_tril=FillScaleTriL().forward(
+                t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
+                    for i in range(K)])))
 
     # optimizer, learning rate, and loss function
     opt = Adam(1e-4)
