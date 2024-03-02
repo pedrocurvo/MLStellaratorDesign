@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from keras.models import Sequential
-from keras.layers import Dense, Lambda
+from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
