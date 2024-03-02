@@ -58,17 +58,13 @@ model.summary()
 
 # -----------------------------------------------------------------------------
 
-batch_size = 2000
+steps_per_epoch = 100
+
+batch_size = X_train.shape[0] // steps_per_epoch
 print('batch_size:', batch_size)
 
-train_steps = X_train.shape[0] // batch_size
-valid_steps = X_valid.shape[0] // batch_size
-
-print('train_steps:', train_steps)
-print('valid_steps:', valid_steps)
-
-n_train = train_steps * batch_size
-n_valid = valid_steps * batch_size
+n_train = (X_train.shape[0] // batch_size) * batch_size
+n_valid = (X_valid.shape[0] // batch_size) * batch_size
 
 X_train = X_train[:n_train]
 Y_train = Y_train[:n_train]
@@ -84,7 +80,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 2000
+epochs = 5000
 
 cb = callback()
 
