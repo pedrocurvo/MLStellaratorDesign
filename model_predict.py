@@ -8,25 +8,30 @@ from sampling import sample_output, round_nfp, run_qsc, check_criteria
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset.csv')
+fname = Path('data').joinpath('dataset_2M.csv')
 print('Reading:', fname)
 df = pd.read_csv(fname)
 
 # -----------------------------------------------------------------------------
 
 nrows = df.shape[0]
-nrows = nrows - nrows % 100000
+nrows = nrows - nrows % 10000
 df = df.iloc[:nrows]
+
+# -----------------------------------------------------------------------------
+
+mean = df.mean()
+std = df.std()
 
 # -----------------------------------------------------------------------------
 
 dim = 10
 
-X_mean = df[df.columns[dim:]].mean().values
-Y_mean = df[df.columns[:dim]].mean().values
+X_mean = mean[dim:].values
+Y_mean = mean[:dim].values
 
-X_std = df[df.columns[dim:]].std().values
-Y_std = df[df.columns[:dim]].std().values
+X_std = std[dim:].values
+Y_std = std[:dim].values
 
 # -----------------------------------------------------------------------------
 

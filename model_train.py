@@ -3,18 +3,18 @@ import pandas as pd
 
 from pathlib import Path
 
-from model import create_model, load_weights, save_weights, callback
+from model import create_model, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset.csv')
+fname = Path('data').joinpath('dataset_2M.csv')
 print('Reading:', fname)
 df = pd.read_csv(fname)
 
 # -----------------------------------------------------------------------------
 
 nrows = df.shape[0]
-nrows = nrows - nrows % 100000
+nrows = nrows - nrows % 10000
 df = df.iloc[:nrows]
 
 # -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ model.summary()
 
 # -----------------------------------------------------------------------------
 
-batch_size = 2000
+batch_size = 1000
 epochs = 2000
 
 cb = callback()
