@@ -49,6 +49,17 @@ model.summary()
 batch_size = 2000
 epochs = 2000
 
+print('batch_size:', batch_size)
+print('epochs:', epochs)
+
+validation_split = 0.2
+
+print('train samples:', (1. - validation_split) * X.shape[0])
+print('valid samples:', validation_split * X.shape[0])
+
+print('train steps:', (1. - validation_split) * X.shape[0] / batch_size)
+print('valid steps:', validation_split * X.shape[0] / batch_size)
+
 cb = callback()
 
 try:
@@ -56,7 +67,7 @@ try:
               batch_size=batch_size,
               epochs=epochs,
               verbose=0,
-              validation_split=0.2,
+              validation_split=validation_split,
               callbacks=[cb])
 
 except KeyboardInterrupt:
