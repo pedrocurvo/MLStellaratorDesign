@@ -16,10 +16,6 @@ from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
 def create_model(input_dim, output_dim):
     model = Sequential()
 
-    # neural network
-    model.add(Dense(2048, activation='tanh', input_dim=input_dim))
-    model.add(Dense(2048, activation='tanh'))
-    
     # number of parameters for each component of the mixture model
     loc_size = output_dim
     scale_size = output_dim * (output_dim + 1) // 2
@@ -28,6 +24,10 @@ def create_model(input_dim, output_dim):
     # number of components for the mixture model
     K = 10
     units = K + K * params_size
+
+    # neural network
+    model.add(Dense(units, activation='tanh', input_dim=input_dim))
+    model.add(Dense(units, activation='tanh'))
     model.add(Dense(units))
 
     # bijector for scale_tril
