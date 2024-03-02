@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from tqdm import tqdm
 from pathlib import Path
 
 from model import create_model, load_weights
@@ -29,14 +30,28 @@ Y_std = std[:dim].values
 
 # -----------------------------------------------------------------------------
 
+passed = []
+
+for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
+    try:
+        output = row[dim:].values
+        check_criteria(output)
+        passed.append(idx)
+    except AssertionError:
+        continue
+
+df = df.iloc[passed]
+
+# -----------------------------------------------------------------------------
+
 input_dim = dim
 output_dim = dim
 
 model = create_model(input_dim, output_dim)
 
-load_weights(model)
-
 model.summary()
+
+load_weights(model)
 
 # -----------------------------------------------------------------------------
 
@@ -45,21 +60,14 @@ print('Writing:', fname)
 
 if not fname.exists():
     f = open(fname, 'w')
-    fields_input = ['rc1', 'rc2', 'rc3',
-                    'zs1', 'zs2', 'zs3',
-                    'nfp', 'etabar', 'B2c', 'p2']
-    fields_output = ['axis_length', 'iota', 'max_elongation',
-                     'min_L_grad_B', 'min_R0', 'r_singularity',
-                     'L_grad_grad_B', 'B20_variation', 'beta',
-                     'DMerc_times_r2']
-    fields = fields_input + fields_output
+    fields = df.columns.values
     print(','.join(fields), file=f)
 else:
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
 
-batch_size = 1000
+batch_size = 2000
 
 n_passed = 0
 n_failed = 0

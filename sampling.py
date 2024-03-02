@@ -108,45 +108,16 @@ def check_criteria(output):
 
 def sample_output(dataset):
 
-    axis_length = dataset['axis_length'].values
-    axis_length = axis_length[axis_length > 0.]
-    axis_length = np.random.choice(axis_length)
-
-    iota = dataset['iota'].values
-    iota = iota[np.fabs(iota) >= 0.2]
-    iota = np.random.choice(iota)
-
-    max_elongation = dataset['max_elongation'].values
-    max_elongation = max_elongation[max_elongation <= 10.]
-    max_elongation = np.random.choice(max_elongation)
-
-    min_L_grad_B = dataset['min_L_grad_B'].values
-    min_L_grad_B = min_L_grad_B[np.fabs(min_L_grad_B) >= 0.1]
-    min_L_grad_B = np.random.choice(min_L_grad_B)
-
-    min_R0 = dataset['min_R0'].values
-    min_R0 = min_R0[np.fabs(min_R0) >= 0.3]
-    min_R0 = np.random.choice(min_R0)
-
-    r_singularity = dataset['r_singularity'].values
-    r_singularity = r_singularity[r_singularity >= 0.05]
-    r_singularity = np.random.choice(r_singularity)
-
-    L_grad_grad_B = dataset['L_grad_grad_B'].values
-    L_grad_grad_B = L_grad_grad_B[np.fabs(L_grad_grad_B) >= 0.1]
-    L_grad_grad_B = np.random.choice(L_grad_grad_B)
-    
-    B20_variation = dataset['B20_variation'].values
-    B20_variation = B20_variation[B20_variation <= 5.]
-    B20_variation = np.random.choice(B20_variation)
-
-    beta = dataset['beta'].values
-    beta = beta[beta >= 1e-4]
-    beta = np.random.choice(beta)
-
-    DMerc_times_r2 = dataset['DMerc_times_r2'].values
-    DMerc_times_r2 = DMerc_times_r2[DMerc_times_r2 > 0.]
-    DMerc_times_r2 = np.random.choice(DMerc_times_r2)
+    axis_length    = np.random.choice(dataset['axis_length'   ].values)
+    iota           = np.random.choice(dataset['iota'          ].values)
+    max_elongation = np.random.choice(dataset['max_elongation'].values)
+    min_L_grad_B   = np.random.choice(dataset['min_L_grad_B'  ].values)
+    min_R0         = np.random.choice(dataset['min_R0'        ].values)
+    r_singularity  = np.random.choice(dataset['r_singularity' ].values)
+    L_grad_grad_B  = np.random.choice(dataset['L_grad_grad_B' ].values)
+    B20_variation  = np.random.choice(dataset['B20_variation' ].values)
+    beta           = np.random.choice(dataset['beta'          ].values)
+    DMerc_times_r2 = np.random.choice(dataset['DMerc_times_r2'].values)
 
     sample = [axis_length, iota, max_elongation,
               min_L_grad_B, min_R0, r_singularity,
