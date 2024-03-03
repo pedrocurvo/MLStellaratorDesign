@@ -78,7 +78,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 2000
+epochs = 5000
 
 cb = callback()
 
