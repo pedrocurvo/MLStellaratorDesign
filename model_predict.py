@@ -9,7 +9,7 @@ from sampling import sample_output, round_nfp, run_qsc, check_criteria
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset_2M.csv')
+fname = Path('data').joinpath('dataset.csv')
 print('Reading:', fname)
 df = pd.read_csv(fname)
 

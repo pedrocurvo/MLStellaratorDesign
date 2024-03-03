@@ -7,7 +7,7 @@ from model import create_model, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset_2M.csv')
+fname = Path('data').joinpath('dataset.csv')
 print('Reading:', fname)
 df = pd.read_csv(fname)
 
