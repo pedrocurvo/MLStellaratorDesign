@@ -58,7 +58,9 @@ model.summary()
 
 # -----------------------------------------------------------------------------
 
-batch_size = 2000
+steps_per_epoch = 1000
+
+batch_size = X_train.shape[0] // steps_per_epoch
 print('batch_size:', batch_size)
 
 n_train = (X_train.shape[0] // batch_size) * batch_size
@@ -78,7 +80,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 5000
+epochs = 4000
 
 cb = callback()
 
