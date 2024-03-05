@@ -30,19 +30,6 @@ if __name__ == "__main__":
     # Load the data
     full_dataset = StellaratorDataSetInverse(npy_file='data/dataset.npy')
 
-    # full_dataset = full_dataset.calculate_data_counts(
-    #                           AXIS_LENGTH=0,
-    #                           IOTA_MIN = 0.2,
-    #                           MAX_ELONGATION = 10,
-    #                           MIN_MIN_L_GRAD_B = 0.1,
-    #                           MIN_MIN_R0 = 0.3,
-    #                           MIN_R_SINGULARITY = 0.05,
-    #                           MIN_L_GRAD_GRAD_B = 0.01,
-    #                           MAX_B20_VARIATION = 5,
-    #                           MIN_BETA = 1e-4,
-    #                           MIN_DMERC_TIMES_R2 = 0,
-    #                           return_object=True)
-
     # Setup device-agnostic code 
     if torch.cuda.is_available():
         device = "cuda" # NVIDIA GPU
@@ -85,13 +72,6 @@ if __name__ == "__main__":
             nn.init.zeros_(param)
         elif "weight" in name:
             nn.init.normal_(param, mean=0, std=0.1)
-
-    # # Use K-Means to find possible initializations for the means
-    # from sklearn.cluster import KMeans
-    # kmeans = KMeans(n_clusters=5, random_state=0).fit(full_dataset.labels)
-    # print(kmeans.cluster_centers_.shape)
-    # print(model.mu.weight.data.shape)
-    # model.mu.weight.data = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32).to(device)
 
     # Set up loss function and optimizer
     loss_fn = model.mean_log_Gaussian_like
