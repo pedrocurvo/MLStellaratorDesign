@@ -21,7 +21,7 @@ def create_model(input_dim, output_dim):
     params_size = loc_size + scale_size
 
     # number of components for the mixture model
-    K = 8
+    K = 10
     units = K + K * params_size
 
     # neural network
@@ -85,22 +85,11 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f *' % (t, epoch, loss, val_loss))
         else:
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
-
         if (epoch > 2*self.min_val_epoch):
             print('Stop training.')
             self.model.stop_training = True
-
         if np.isnan(loss) or np.isnan(val_loss):
-            print('Stop training (nan loss).')
-            self.model.stop_training = True
-
-        if np.isinf(loss) or np.isinf(val_loss):
-            print('Stop training (inf loss).')
-            self.model.stop_training = True
-
-        if (loss == 0.) or (val_loss == 0.):
-            print('Stop training (zero loss).')
-            self.model.stop_training = True
+            self.model.set_weights(self.min_val_weights)
 
     def get_weights(self):
         return self.min_val_weights
