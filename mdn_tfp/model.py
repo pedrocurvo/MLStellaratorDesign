@@ -72,12 +72,14 @@ class callback(Callback):
         self.min_val_loss = None
         self.min_val_epoch = None
         self.min_val_weights = None
+        self.previous_weights = self.model.get_weights()
         print('%-10s %10s %10s %10s' % ('time', 'epoch', 'loss', 'val_loss'))
         
     def on_epoch_end(self, epoch, logs=None):
         t = time.strftime('%H:%M:%S')
         loss = logs['loss']
         val_loss = logs['val_loss']
+
         if (self.min_val_loss == None) or (val_loss < self.min_val_loss):
             self.min_val_loss = val_loss
             self.min_val_epoch = epoch
@@ -85,11 +87,15 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f *' % (t, epoch, loss, val_loss))
         else:
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
+
         if (epoch > 2*self.min_val_epoch):
             print('Stop training.')
             self.model.stop_training = True
+
         if np.isnan(loss) or np.isnan(val_loss):
-            self.model.set_weights(self.min_val_weights)
+            self.model.set_weights(self.previous_weights)
+        else:
+            self.previous_weights = self.model.get_weights()
 
     def get_weights(self):
         return self.min_val_weights

@@ -19,18 +19,6 @@ df = df / std
 
 # -----------------------------------------------------------------------------
 
-print('%-20s %10s %10s %10s %10s %10s' % ('', 'min', 'max', 'mean', 'std', 'median'))
-
-for col in df.columns:
-    print('%-20s %10.3E %10.3E %10.3E %10.3E %10.3E' % (col,
-                                                        df[col].min(),
-                                                        df[col].max(),
-                                                        df[col].mean(),
-                                                        df[col].std(),
-                                                        df[col].median()))
-
-# -----------------------------------------------------------------------------
-
 dim = 10
 
 X = df[df.columns[dim:]].values.astype(np.float32)
