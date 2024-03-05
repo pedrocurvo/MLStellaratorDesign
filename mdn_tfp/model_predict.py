@@ -1,15 +1,15 @@
+import os
+import tqdm
+
 import numpy as np
 import pandas as pd
-
-from tqdm import tqdm
-from pathlib import Path
 
 from model import create_model, load_weights
 from sampling import sample_output, round_nfp, run_qsc, check_criteria
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset.csv')
+fname = 'dataset.csv'
 print('Reading:', fname)
 df = pd.read_csv(fname)
 
@@ -32,7 +32,7 @@ Y_std = std[:dim].values
 
 passed = []
 
-for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
+for idx, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
     try:
         output = row[dim:].values
         check_criteria(output)
@@ -55,10 +55,10 @@ load_weights(model)
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('predict.csv')
+fname = 'predict.csv'
 print('Writing:', fname)
 
-if not fname.exists():
+if not os.path.isfile(fname):
     f = open(fname, 'w')
     fields = df.columns.values
     print(','.join(fields), file=f)

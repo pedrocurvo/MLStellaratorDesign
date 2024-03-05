@@ -1,13 +1,11 @@
 import numpy as np
 import pandas as pd
 
-from pathlib import Path
-
 from model import create_model, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
-fname = Path('data').joinpath('dataset.csv')
+fname = 'dataset.csv'
 print('Reading:', fname)
 df = pd.read_csv(fname)
 

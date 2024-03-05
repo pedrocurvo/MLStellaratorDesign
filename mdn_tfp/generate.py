@@ -1,42 +1,37 @@
+import os
+import tqdm
+
 import numpy as np
 import pandas as pd
-
-from pathlib import Path
-from tqdm import tqdm
 
 from sampling import sample_input, run_qsc
 
 # -----------------------------------------------------------------------------
-# set up the output directory, and the output file
-
-DATA_DIR = Path('data')
-DATA_DIR.mkdir(exist_ok=True, parents=True)
-
-fname = DATA_DIR.joinpath('dataset.csv')
-
-# -----------------------------------------------------------------------------
 # open the output file for writing or appending
 
-if not fname.exists():
+fname = 'dataset.csv'
+
+if not os.path.isfile(fname):
     initial = 0
     f = open(fname, 'w')
-    fields_sample = ['rc1', 'rc2', 'rc3',
-                     'zs1', 'zs2', 'zs3',
-                     'nfp', 'etabar', 'B2c', 'p2']
-    fields_output = ['axis_length', 'iota', 'max_elongation',
-                     'min_L_grad_B', 'min_R0', 'r_singularity',
-                     'L_grad_grad_B', 'B20_variation', 'beta',
-                     'DMerc_times_r2']
-    fields = fields_sample + fields_output
+    fields = ['rc1', 'rc2', 'rc3',
+              'zs1', 'zs2', 'zs3',
+              'nfp', 'etabar', 'B2c', 'p2',
+              'axis_length', 'iota', 'max_elongation',
+              'min_L_grad_B', 'min_R0', 'r_singularity',
+              'L_grad_grad_B', 'B20_variation', 'beta',
+              'DMerc_times_r2']
     print(','.join(fields), file=f)
+
 else:
-    initial = pd.read_csv(fname).shape[0]
+    df = pd.read_csv(fname)
+    initial = df.shape[0]
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
 # keep generating until keyboard interrupt
 
-pbar = tqdm(total=np.inf, desc='Data counter', initial=initial)
+pbar = tqdm.tqdm(total=np.inf, desc='Data counter', initial=initial)
 
 while True:
     try:
