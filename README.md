@@ -112,15 +112,3 @@ The project is structured as follows:
 
 8. Alternatively, if you are using VSCode, you can install the TensorBoard extension and visualize the tensorboard log directly in VSCode by
 pressing ```Cmd+Shift+P``` and typing ```Python: Launch TensorBoard ``` and selecting the dir or log you want to visualize.
-
-## Probabilistic model
-
-The probabilistic model is a mixture density network parameterized by a neural network (see `model.py`).
-
-1. Generate the training data by running `generate.py`. This will generate a dataset in `data/dataset.csv`.
-
-2. Train the model by running `model_train.py`. The model weights will be saved in `model_weights.h5`.
-
-3. Predict "good" stellarators by running `model_predict.py`. The results will be saved in `data/predict.csv`.
-
-The script `sampling.py` contains supporting routines for `generate.py` and `model_predict.py`.
