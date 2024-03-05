@@ -177,7 +177,6 @@ def distribution_hist(y_true: torch.tensor,
     figure = plt.figure(figsize=(8, 8))
     sns.histplot(y_true, color="blue", kde=True, label="True", stat="density")
     sns.histplot(y_pred, color="red", kde=True, label="Predicted", stat="density")
-    plt.xlim(np.min(y_true), np.max(y_true))
     plt.legend()
     plt.title(f"Distribution of {variable_name}")
 

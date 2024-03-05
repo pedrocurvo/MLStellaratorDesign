@@ -72,8 +72,8 @@ class StellaratorDataSetInverse(Dataset):
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         # Returns one sample of the data, data and label (X, y).
-        features = torch.tensor(self.data[idx, 10:], dtype=torch.float32)
-        labels = torch.tensor(self.data[idx, :10], dtype=torch.float32)
+        features = torch.tensor(self.data[idx, self.separation_idx:], dtype=torch.float32)
+        labels = torch.tensor(self.data[idx, :self.separation_idx], dtype=torch.float32)
         if self.transform:
             features = self.transform(features, self.mean, self.std)
             labels = self.transform(labels, self.mean_labels, self.std_labels)
