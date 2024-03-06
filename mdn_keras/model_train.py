@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from keras.callbacks import TensorBoard
+
 from model import create_model, save_weights, callback
 
 # -----------------------------------------------------------------------------
@@ -81,6 +83,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 epochs = 4000
 
 cb = callback()
+tb = TensorBoard(write_graph=False)
 
 try:
     model.fit(X_train, Y_train,
@@ -88,7 +91,7 @@ try:
               epochs=epochs,
               verbose=0,
               validation_data=(X_valid, Y_valid),
-              callbacks=[cb])
+              callbacks=[cb, tb])
 
 except KeyboardInterrupt:
     pass
