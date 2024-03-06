@@ -82,7 +82,7 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load("models/MDN_FCOV/2024_03_05_10_28_38.pth"))
 
     # Set up loss function and optimizer
-    loss_fn = model.loss1
+    loss_fn = model.log_prob_loss
     optimizer = torch.optim.Adam(model.parameters(),
                                 lr=LEARNING_RATE,
                                 eps=1e-06,
