@@ -30,25 +30,6 @@ if __name__ == "__main__":
     # Load the data
     full_dataset = StellaratorDataSetInverse(npy_file='data/dataset.npy')
 
-    # full_dataset = full_dataset.calculate_data_counts(
-    #                         rc1=0,
-    #                         rc2=-10,
-    #                         rc3=-10,
-    #                         zs1=-10,
-    #                         zs2=-10,
-    #                         zs3=-10,
-    #                           AXIS_LENGTH=0,
-    #                           IOTA_MIN = 0.2,
-    #                           MAX_ELONGATION = 100,
-    #                           MIN_MIN_L_GRAD_B = 0.01,
-    #                           MIN_MIN_R0 = 0.3,
-    #                           MIN_R_SINGULARITY = 0,
-    #                           MIN_L_GRAD_GRAD_B = 0,
-    #                           MAX_B20_VARIATION = np.finfo(np.float32).max,
-    #                           MIN_BETA = 0,
-    #                           MIN_DMERC_TIMES_R2 = -np.finfo(np.float32).max,
-    #                           return_object=True)
-
     # Setup device-agnostic code 
     if torch.cuda.is_available():
         device = "cuda" # NVIDIA GPU
@@ -85,17 +66,24 @@ if __name__ == "__main__":
                                 num_gaussians=5
     ).to(device)
 
+    # Initialize all biases to zero and all weights from N(0, 0.1)
+    for name, param in model.named_parameters():
+        if "bias" in name:
+            nn.init.zeros_(param)
+        elif "weight" in name:
+            nn.init.normal_(param, mean=0, std=0.1)
+
     # Set up loss function and optimizer
     loss_fn = model.mean_log_Gaussian_like
-    optimizer = torch.optim.Adam(model.parameters(),
-                                lr=LEARNING_RATE,
-                                weight_decay=WEIGHT_DECAY
-    )
-    # optimizer=torch.optim.RMSprop(model.parameters(),
-    #                               lr=LEARNING_RATE,
-    #                               alpha=0.9, eps=1e-07,
-    #                               weight_decay=WEIGHT_DECAY,
-    #                               momentum=MOMENTUM, centered=False)
+    # optimizer = torch.optim.Adam(model.parameters(),
+    #                             lr=LEARNING_RATE,
+    #                             weight_decay=WEIGHT_DECAY
+    # )
+    optimizer=torch.optim.RMSprop(model.parameters(),
+                                  lr=LEARNING_RATE,
+                                  alpha=0.9, eps=1e-07,
+                                  weight_decay=WEIGHT_DECAY,
+                                  momentum=MOMENTUM, centered=False)
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",

@@ -257,80 +257,74 @@ def train(model: torch.nn.Module,
     # Loop through training and testing steps for a number of epochs
     for epoch in progress_bar:
         progress_bar.set_description(f"Epoch {epoch+1}")
-        try:
-            train_loss, train_acc = 0, 0
-            val_loss, val_acc = 0, 0
+        train_loss, train_acc = 0, 0
+        val_loss, val_acc = 0, 0
+        if classification:
+            train_metrics = train_loss, train_acc
+            test_metrics = val_loss, val_acc
+        else:
+            train_metrics = train_loss 
+        train_metrics = train_step(epoch=epoch,
+                                        model=model,
+                                        dataloader=train_dataloader,
+                                        loss_fn=loss_fn,
+                                        optimizer=optimizer,
+                                        device=device,
+                                        classification=classification,
+                                        disable_progress_bar=False)
+        test_metrics = test_step(epoch=epoch,
+                                        model=model,
+                                        dataloader=val_dataloader,
+                                        loss_fn=loss_fn,
+                                        device=device,
+                                        classification=classification,
+                                        disable_progress_bar=False)
+
+        # Print depending on classification or regression
+        if classification:
+            train_loss, train_acc = train_metrics
+            val_loss, val_acc = test_metrics
+            # Print out what's happening
+            print(
+            f"\nEpoch: {epoch+1} | "
+            f"train_loss: {train_loss:.4f} | "
+            f"train_acc: {train_acc:.4f} | "
+            f"val_loss: {val_loss:.4f} | "
+            f"val_acc: {val_acc:.4f}"
+            )
+
+            # Update results dictionary
+            results["train_loss"].append(train_loss)
+            results["train_acc"].append(train_acc)
+            results["val_loss"].append(val_loss)
+            results["val_acc"].append(val_acc)
+        
+        else:
+            train_loss = train_metrics
+            val_loss = test_metrics
+            # Print out what's happening
+            print(
+            f"\ntrain_loss: {train_loss:.4f} | "
+            f"val_loss: {val_loss:.4f}"
+            )
+
+            # Update results dictionary
+            results["train_loss"].append(train_loss)
+            results["val_loss"].append(val_loss)
+
+        if writer:
+            # Add loss results to SummaryWriter
+            writer.add_scalar("Loss/Train", train_loss, epoch)
+            writer.add_scalar("Loss/Val", val_loss, epoch)
             if classification:
-                train_metrics = train_loss, train_acc
-                test_metrics = val_loss, val_acc
-            else:
-                train_metrics = train_loss 
-            train_metrics = train_step(epoch=epoch,
-                                            model=model,
-                                            dataloader=train_dataloader,
-                                            loss_fn=loss_fn,
-                                            optimizer=optimizer,
-                                            device=device,
-                                            classification=classification,
-                                            disable_progress_bar=False)
-            test_metrics = test_step(epoch=epoch,
-                                            model=model,
-                                            dataloader=val_dataloader,
-                                            loss_fn=loss_fn,
-                                            device=device,
-                                            classification=classification,
-                                            disable_progress_bar=False)
+                # Add accuracy results to SummaryWriter
+                writer.add_scalar("Accuracy/Train", train_acc, epoch)
+                writer.add_scalar("Accuracy/Val", val_acc, epoch)
 
-            # Print depending on classification or regression
-            if classification:
-                train_loss, train_acc = train_metrics
-                val_loss, val_acc = test_metrics
-                # Print out what's happening
-                print(
-                f"\nEpoch: {epoch+1} | "
-                f"train_loss: {train_loss:.4f} | "
-                f"train_acc: {train_acc:.4f} | "
-                f"val_loss: {val_loss:.4f} | "
-                f"val_acc: {val_acc:.4f}"
-                )
-
-                # Update results dictionary
-                results["train_loss"].append(train_loss)
-                results["train_acc"].append(train_acc)
-                results["val_loss"].append(val_loss)
-                results["val_acc"].append(val_acc)
-            
-            else:
-                train_loss = train_metrics
-                val_loss = test_metrics
-                # Print out what's happening
-                print(
-                f"\ntrain_loss: {train_loss:.4f} | "
-                f"val_loss: {val_loss:.4f}"
-                )
-
-                # Update results dictionary
-                results["train_loss"].append(train_loss)
-                results["val_loss"].append(val_loss)
-
-            if writer:
-                # Add loss results to SummaryWriter
-                writer.add_scalar("Loss/Train", train_loss, epoch)
-                writer.add_scalar("Loss/Val", val_loss, epoch)
-                if classification:
-                    # Add accuracy results to SummaryWriter
-                    writer.add_scalar("Accuracy/Train", train_acc, epoch)
-                    writer.add_scalar("Accuracy/Val", val_acc, epoch)
-
-                # Track the PyTorch model architecture
-                writer.add_graph(model=model, 
-                            # Pass in an example input
-                            input_to_model=torch.randn(32, 10).to(device))
-
-        except KeyboardInterrupt:
-            print("\nKeyboard interrupt detected.")
-            print("Stopping training...")
-            break
+            # Track the PyTorch model architecture
+            writer.add_graph(model=model, 
+                        # Pass in an example input
+                        input_to_model=torch.randn(32, 10).to(device))
 
     # Return the filled results at the end of the epochs
     return results

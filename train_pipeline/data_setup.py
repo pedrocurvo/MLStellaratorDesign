@@ -10,6 +10,30 @@ import os
 import requests
 from tqdm import tqdm
 from pathlib import Path
+import pandas as pd
+import numpy as np
+
+def convert_csv_to_npy(csv_file_path):
+    # Automatically set the output .npy file path
+    npy_file_path = csv_file_path.replace('.csv', '.npy')
+
+    # Chunk size (adjust based on your available memory)
+    chunk_size = 10000
+
+    # NP array to store the data
+    data = np.empty((0, 20))
+
+    # Iterate over chunks of the CSV file
+    for chunk in pd.read_csv(csv_file_path, chunksize=chunk_size):
+        # Assuming the chunk is a DataFrame, convert it to a NumPy array
+        data = np.concatenate((data, chunk.to_numpy()), axis=0)
+
+    # Print the shape of the data
+    print(f"\nThe data has been successfully processed and has been saved to {npy_file_path}")
+    print(f"Shape of the data array: {data.shape}\n")
+
+    # Save the data as a NumPy array
+    np.save(npy_file_path, data)
 
 def download_data(file_path: str, doi: str = '10651537', size: int = 2.42e9):
     """
@@ -52,7 +76,7 @@ def download_data(file_path: str, doi: str = '10651537', size: int = 2.42e9):
                     pbar.update(len(chunk))
 
         print("Converting dataset to .npy format...")
-        os.system(f"python3 CSVtoNumpyConverter.py {file_path}")
+        convert_csv_to_npy(file_path)
         print("Dataset downloaded successfully.")
     else:
         print("Dataset already exists.")
