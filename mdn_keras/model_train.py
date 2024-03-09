@@ -80,7 +80,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 4000
+epochs = 5000
 
 cb = callback()
 tb = TensorBoard(write_graph=False)

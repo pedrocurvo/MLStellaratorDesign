@@ -21,7 +21,7 @@ def create_model(input_dim, output_dim):
     params_size = loc_size + scale_size
 
     # number of components for the mixture model
-    K = 8
+    K = 10
     units = K + K * params_size
 
     # neural network
