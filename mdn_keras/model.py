@@ -88,8 +88,7 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
 
         if np.isnan(loss) or np.isnan(val_loss):
-            self.model.set_weights(self.min_val_weights)
-            self.model.optimizer = Adam(self.model.optimizer.learning_rate)
+            self.model.stop_training = True
 
     def get_weights(self):
         return self.min_val_weights
