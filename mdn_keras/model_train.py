@@ -3,7 +3,7 @@ import pandas as pd
 
 from keras.callbacks import TensorBoard
 
-from model import create_model, save_weights, callback
+from model import create_model, load_weights, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
@@ -55,6 +55,8 @@ output_dim = dim
 model = create_model(input_dim, output_dim)
 
 model.summary()
+
+load_weights(model)
 
 # -----------------------------------------------------------------------------
 
