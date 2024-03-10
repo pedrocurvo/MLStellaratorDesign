@@ -49,17 +49,6 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-input_dim = dim
-output_dim = dim
-
-model = create_model(input_dim, output_dim)
-
-model.summary()
-
-load_weights(model)
-
-# -----------------------------------------------------------------------------
-
 steps_per_epoch = 1000
 
 batch_size = X_train.shape[0] // steps_per_epoch
@@ -82,24 +71,29 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 5000
+while True:
+    try:
+        model = create_model(X.shape[1], Y.shape[1])
 
-cb = callback()
-tb = TensorBoard(write_graph=False)
+        model.summary()
 
-try:
-    model.fit(X_train, Y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              verbose=0,
-              validation_data=(X_valid, Y_valid),
-              callbacks=[cb, tb])
+        load_weights(model)
 
-except KeyboardInterrupt:
-    pass
+        epochs = 5000
 
-# -----------------------------------------------------------------------------
+        cb = callback()
+        tb = TensorBoard(write_graph=False)
 
-model.set_weights(cb.get_weights())
+        model.fit(X_train, Y_train,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  verbose=0,
+                  validation_data=(X_valid, Y_valid),
+                  callbacks=[cb, tb])
 
-save_weights(model)
+        model.set_weights(cb.get_weights())
+
+        save_weights(model)
+
+    except KeyboardInterrupt:
+        break
