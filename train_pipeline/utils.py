@@ -16,8 +16,8 @@ def parser():
     """
     parser = argparse.ArgumentParser(description="Train a model", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size")
-    parser.add_argument("--num_epochs", type=int, default=10, help="Number of epochs")
-    parser.add_argument("--learning_rate", type=float, default=0.01, help="Learning rate")
+    parser.add_argument("--num_epochs", "--epochs" ,type=int, default=10, help="Number of epochs")
+    parser.add_argument("--learning_rate", "-lr", type=float, default=0.01, help="Learning rate")
     parser.add_argument("--weight_decay", type=float, default=0, help="Weight decay")
     parser.add_argument("--loss_function",
                         type=str,
