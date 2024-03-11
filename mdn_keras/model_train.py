@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-from model import create_model, save_weights, callback
+from keras.callbacks import TensorBoard
+
+from model import create_model, load_weights, save_weights, callback
 
 # -----------------------------------------------------------------------------
 
@@ -47,15 +49,6 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-input_dim = dim
-output_dim = dim
-
-model = create_model(input_dim, output_dim)
-
-model.summary()
-
-# -----------------------------------------------------------------------------
-
 steps_per_epoch = 1000
 
 batch_size = X_train.shape[0] // steps_per_epoch
@@ -78,23 +71,27 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-epochs = 4000
+while True:
+    try:
+        model = create_model(X.shape[1], Y.shape[1])
+        model.summary()
+        load_weights(model)
 
-cb = callback()
+        epochs = 5000
+        cb = callback()
+        tb = TensorBoard(write_graph=False)
 
-try:
-    model.fit(X_train, Y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              verbose=0,
-              validation_data=(X_valid, Y_valid),
-              callbacks=[cb])
+        model.fit(X_train, Y_train,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  verbose=0,
+                  validation_data=(X_valid, Y_valid),
+                  callbacks=[cb, tb])
 
-except KeyboardInterrupt:
-    pass
+        model.set_weights(cb.get_weights())
+        save_weights(model)
 
-# -----------------------------------------------------------------------------
-
-model.set_weights(cb.get_weights())
-
-save_weights(model)
+    except KeyboardInterrupt:
+        model.set_weights(cb.get_weights())
+        save_weights(model)
+        break

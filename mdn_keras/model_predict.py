@@ -28,6 +28,12 @@ Y_mean = mean[:dim].values
 X_std = std[dim:].values
 Y_std = std[:dim].values
 
+print('X_mean:', X_mean.shape, X_mean.dtype)
+print('Y_mean:', Y_mean.shape, Y_mean.dtype)
+
+print('X_std:', X_std.shape, X_std.dtype)
+print('Y_std:', Y_std.shape, Y_std.dtype)
+
 # -----------------------------------------------------------------------------
 
 passed = []
@@ -42,12 +48,11 @@ for idx, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
 
 df = df.iloc[passed]
 
+print('df:', df.shape)
+
 # -----------------------------------------------------------------------------
 
-input_dim = dim
-output_dim = dim
-
-model = create_model(input_dim, output_dim)
+model = create_model(X_mean.shape[0], Y_mean.shape[0])
 
 model.summary()
 
