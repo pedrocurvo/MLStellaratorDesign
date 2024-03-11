@@ -54,7 +54,7 @@ if __name__ == "__main__":
     LEARNING_RATE = args.learning_rate
     WEIGHT_DECAY = args.weight_decay
     MOMENTUM = 0
-    NUM_OF_WORKERS = 0
+    NUM_OF_WORKERS = os.cpu_count()
 
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    model.load_state_dict(torch.load("models/MDN_FCOV/2024_03_05_10_28_38.pth"))
+    #model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_08_04_07_11.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss

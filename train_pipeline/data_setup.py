@@ -150,21 +150,24 @@ def create_dataloaders(
                             shuffle=False, # shuffle data (for training set only)
                             num_workers=num_workers, # subprocesses to use for data loading
                             drop_last=True, # drop the last batch if it is not complete
-                            # pin_memory=True # CUDA only
+                            multiprocessing_context='fork', # this ensures that the DataLoader is fork-safe and can be used in a multiprocessing environment (num_workers > 0)
+                            pin_memory=True, # CUDA only
     ) 
 
     val_loader = DataLoader(dataset=val_dataset,
                             batch_size=batch_size,
                             shuffle=False,
                             num_workers=num_workers,
-                            pin_memory=True
+                            multiprocessing_context='fork', # this ensures that the DataLoader is fork-safe and can be used in a multiprocessing environment (num_workers > 0)
+                            pin_memory=True,
     )
 
     test_loader = DataLoader(dataset=test_dataset,
                             batch_size=batch_size,
                             shuffle=False,
                             num_workers=num_workers,
-                            # pin_memory=True
+                            multiprocessing_context='fork',
+                            pin_memory=True
     )
 
     # Dictionary containing the mean and standard deviation of the training dataset
