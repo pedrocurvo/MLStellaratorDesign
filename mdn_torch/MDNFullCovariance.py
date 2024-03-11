@@ -61,10 +61,13 @@ class MDNFullCovariance(nn.Module):
         alpha = alpha.view(-1, self.num_gaussians)
 
         # Tensor to store L (lower triangular matrix), filled with zeros
-        L = torch.zeros((sigma_diag.shape[0], self.num_gaussians, self.output_dim, self.output_dim), device=parameters.device, dtype=parameters.dtype)
+        L = torch.zeros((sigma_diag.shape[0], self.num_gaussians, self.output_dim, self.output_dim),
+                        device=parameters.device,
+                        dtype=parameters.dtype)
 
         # Compute the indices for the lower triangular portion
-        indices = torch.tril_indices(row=self.output_dim, col=self.output_dim, offset=-1, device=parameters.device)
+        indices = torch.tril_indices(row=self.output_dim, col=self.output_dim, offset=-1,
+                                     device=parameters.device)
 
         # Reshape sigma_not_in_diagonal to have the correct dimensions
         sigma_not_in_diagonal = sigma_not_in_diagonal.view(sigma_not_in_diagonal.shape[0], self.num_gaussians, -1)
@@ -72,7 +75,7 @@ class MDNFullCovariance(nn.Module):
         # Fill the lower triangular matrix
         L[:, :, indices[0], indices[1]] = sigma_not_in_diagonal
 
-        # Add the diagonal to the lower triangular matrix, but first pass it through aan activation function
+        # Add the diagonal to the lower triangular matrix, but first pass it through an activation function
         L[:, :, torch.arange(self.output_dim), torch.arange(self.output_dim)] = nn.ELU()(sigma_diag) + 1
 
         # Pass sigma_not_in_diagonal and sigma_diag through torch.dist to create a MultivariateNormal distribution
