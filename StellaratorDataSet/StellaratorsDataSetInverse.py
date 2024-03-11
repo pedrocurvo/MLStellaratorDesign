@@ -77,6 +77,8 @@ class StellaratorDataSetInverse(Dataset):
         if self.transform:
             features = self.transform(features, self.mean, self.std)
             labels = self.transform(labels, self.mean_labels, self.std_labels)
+        # Remove nfp from the label which is index 6 
+        #labels = torch.cat((labels[:6], labels[7:]))
         return features, labels
     
     #------------------------------------------------------------------------------
