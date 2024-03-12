@@ -79,7 +79,7 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    #model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_08_04_07_11.pth"))
+    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_11_13_56_12.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
@@ -89,6 +89,10 @@ if __name__ == "__main__":
                                 amsgrad=True,
                                 weight_decay=0
     )
+
+    # Learning Rate Scheduler
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,20,30,40,50,60,70,80,90], gamma=0.5)
+
     # optimizer=torch.optim.RMSprop(model.parameters(),
     #                               lr=LEARNING_RATE,
     #                               alpha=0.9, eps=1e-07,
@@ -138,7 +142,8 @@ if __name__ == "__main__":
                 epochs=NUM_EPOCHS,
                 device=device,
                 classification=False,
-                writer=writer)
+                writer=writer,
+                learning_rate_scheduler=scheduler)
 
 
     # Measure time

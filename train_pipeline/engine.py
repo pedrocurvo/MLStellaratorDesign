@@ -197,6 +197,7 @@ def train(model: torch.nn.Module,
           epochs: int,
           device: torch.device,
           writer: torch.utils.tensorboard.writer.SummaryWriter = None,
+          learning_rate_scheduler: torch.optim.lr_scheduler = None,
           classification: bool = True, 
           disable_progress_bar: bool = False) -> Dict[str, List]:
     """Trains and tests a PyTorch model.
@@ -279,6 +280,10 @@ def train(model: torch.nn.Module,
                                         device=device,
                                         classification=classification,
                                         disable_progress_bar=False)
+        
+        # Adjust learning rate if learning rate scheduler is provided
+        if learning_rate_scheduler:
+            learning_rate_scheduler.step()
 
         # Print depending on classification or regression
         if classification:
