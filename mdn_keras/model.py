@@ -1,10 +1,10 @@
 import time
 import numpy as np
 
-from tf_keras.models import Sequential
-from tf_keras.layers import Dense
-from tf_keras.optimizers import Adam
-from tf_keras.callbacks import Callback
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import Adam
+from keras.callbacks import Callback
 
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
