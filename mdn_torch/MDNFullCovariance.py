@@ -30,8 +30,8 @@ class MDNFullCovariance(nn.Module):
         # Mu
         mus = self.mu(x)
         # Sigmas
-        sigmas_not_in_diagonal = self.sigma_not_in_diagonal(x) + 1e-6
-        sigmas_diag = self.sigma_diag(x) + 1e-6 + 1
+        sigmas_not_in_diagonal = self.sigma_not_in_diagonal(x) #+ 1e-6
+        sigmas_diag = self.sigma_diag(x) #+ 1e-6 + 1
         # Pis (they need to sum to 1, so we use a softmax function)
         pis = F.softmax(self.pi(x) - self.pi(x).max(), dim=1)
 
@@ -76,7 +76,7 @@ class MDNFullCovariance(nn.Module):
         L[:, :, indices[0], indices[1]] = sigma_not_in_diagonal
 
         # Add the diagonal to the lower triangular matrix, but first pass it through an activation function
-        L[:, :, torch.arange(self.output_dim), torch.arange(self.output_dim)] = nn.ELU()(sigma_diag) + 1
+        L[:, :, torch.arange(self.output_dim), torch.arange(self.output_dim)] = nn.ELU()(sigma_diag) + 1 + 1e-6
 
         # Pass sigma_not_in_diagonal and sigma_diag through torch.dist to create a MultivariateNormal distribution
         mvn = dist.MultivariateNormal(mu, scale_tril=L)

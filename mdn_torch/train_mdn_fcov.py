@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # Create model
     model = MDNFullCovariance(input_dim=10,
                             output_dim=10,
-                            num_gaussians=5
+                            num_gaussians=50
     ).to(device)
 
     # Initialize the weights of the model
@@ -89,15 +89,15 @@ if __name__ == "__main__":
                                 amsgrad=True,
                                 weight_decay=0
     )
-
-    # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,20,30,40,50,60,70,80,90], gamma=0.5)
-
     # optimizer=torch.optim.RMSprop(model.parameters(),
     #                               lr=LEARNING_RATE,
     #                               alpha=0.9, eps=1e-07,
-    #                               weight_decay=0.1,
+    #                               weight_decay=0,
     #                               momentum=MOMENTUM, centered=False)
+
+    # Learning Rate Scheduler
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.7)
+
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",
