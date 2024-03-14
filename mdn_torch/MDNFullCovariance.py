@@ -21,6 +21,7 @@ class MDNFullCovariance(nn.Module):
             nn.Tanh(),
             nn.Linear(self.num_param, self.num_param),
             nn.Tanh(),
+            # Add more? 
         )
         self.mu = nn.Linear(self.num_param, output_dim * num_gaussians)
         self.sigma_not_in_diagonal = nn.Linear(self.num_param, int(num_gaussians * (output_dim * (output_dim-1)) / 2))
