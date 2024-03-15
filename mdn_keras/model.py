@@ -22,12 +22,11 @@ def create_model(input_dim, output_dim):
     params_size = loc_size + scale_size
 
     # number of components for the mixture model
-    K = 10
+    K = 32
     units = K + K * params_size
 
     # neural network
     model.add(Dense(units, activation='tanh', input_dim=input_dim))
-    model.add(Dense(units, activation='tanh'))
     model.add(Dense(units, activation='tanh'))
     model.add(Dense(units))
 
@@ -64,9 +63,12 @@ def load_weights(model):
     fname = 'model_weights.h5'
     if os.path.isfile(fname):
         print('Reading:', fname)
-        model.load_weights(fname)
+        try:
+            model.load_weights(fname)
+        except ValueError as error:
+            print(error)
     else:
-        print('Not found:', fname)
+        print('File not found:', fname)
 
 # -----------------------------------------------------------------------------
 
