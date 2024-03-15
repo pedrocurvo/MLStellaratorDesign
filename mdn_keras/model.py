@@ -28,6 +28,7 @@ def create_model(input_dim, output_dim):
     # neural network
     model.add(Dense(units, activation='tanh', input_dim=input_dim))
     model.add(Dense(units, activation='tanh'))
+    model.add(Dense(units, activation='tanh'))
     model.add(Dense(units))
 
     # mixture model
