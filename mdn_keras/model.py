@@ -26,9 +26,11 @@ def create_model(input_dim, output_dim):
     units = K + K * params_size
 
     # neural network
-    model.add(Dense(units, activation='tanh', input_dim=input_dim))
-    model.add(Dense(units, activation='tanh'))
-    model.add(Dense(units, activation='tanh'))
+    model.add(Dense(64, activation='tanh', input_dim=input_dim))
+    model.add(Dense(128, activation='tanh'))
+    model.add(Dense(256, activation='tanh'))
+    model.add(Dense(512, activation='tanh'))
+    model.add(Dense(1024, activation='tanh'))
     model.add(Dense(units))
 
     # mixture model
