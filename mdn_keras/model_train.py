@@ -76,9 +76,10 @@ while True:
     try:
         model = create_model(X.shape[1], Y.shape[1])
         model.summary()
-        load_weights(model)
 
-        epochs = 5000
+#       load_weights(model)
+
+        epochs = 2000
         cb = callback()
         tb = TensorBoard(write_graph=False)
 

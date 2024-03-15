@@ -2,6 +2,7 @@ import os
 import time
 import numpy as np
 
+from keras.backend import sin
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -26,7 +27,8 @@ def create_model(input_dim, output_dim):
     units = K + K * params_size
 
     # neural network
-    model.add(Dense(64, activation='tanh', input_dim=input_dim))
+    model.add(Dense(32, activation='tanh', input_dim=input_dim))
+    model.add(Dense(64, activation='tanh'))
     model.add(Dense(128, activation='tanh'))
     model.add(Dense(256, activation='tanh'))
     model.add(Dense(512, activation='tanh'))
