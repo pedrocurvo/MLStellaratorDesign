@@ -21,6 +21,22 @@ class MDNFullCovariance(nn.Module):
             nn.Tanh(),
             nn.Linear(self.num_param, self.num_param),
             nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
+            nn.Linear(self.num_param, self.num_param),
+            nn.Tanh(),
             # Add more? 
         )
         self.mu = nn.Linear(self.num_param, output_dim * num_gaussians)

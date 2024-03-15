@@ -96,7 +96,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.7)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.6)
 
 
     # Create the writer for TensorBoard with help from utils.py
