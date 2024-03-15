@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 
@@ -8,7 +9,7 @@ from keras.callbacks import Callback
 
 from tensorflow_probability.python.layers import DistributionLambda
 from tensorflow_probability.python.distributions import Mixture, Categorical, MultivariateNormalTriL
-from tensorflow_probability.python.bijectors import FillScaleTriL, Exp
+from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
@@ -27,10 +28,8 @@ def create_model(input_dim, output_dim):
     # neural network
     model.add(Dense(units, activation='tanh', input_dim=input_dim))
     model.add(Dense(units, activation='tanh'))
+    model.add(Dense(units, activation='tanh'))
     model.add(Dense(units))
-
-    # bijector for scale_tril
-    bijector = FillScaleTriL(diag_bijector=Exp(), diag_shift=None)
 
     # mixture model
     model.add(DistributionLambda(lambda t: Mixture(
@@ -41,12 +40,14 @@ def create_model(input_dim, output_dim):
             # parameterized mean of each component
             loc=t[...,K+i*params_size:K+i*params_size+loc_size],
             # parameterized covariance of each component
-            scale_tril=bijector.forward(
+            scale_tril=FillScaleTriL().forward(
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
                     for i in range(K)])))
 
     # optimizer, learning rate, and loss function
-    opt = Adam(1e-4)
+    lr = 1e-4
+    print('learning rate:', lr)
+    opt = Adam(learning_rate=lr)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
 
@@ -61,8 +62,11 @@ def save_weights(model):
 
 def load_weights(model):
     fname = 'model_weights.h5'
-    print('Reading:', fname)
-    model.load_weights(fname)
+    if os.path.isfile(fname):
+        print('Reading:', fname)
+        model.load_weights(fname)
+    else:
+        print('Not found:', fname)
 
 # -----------------------------------------------------------------------------
 
