@@ -69,9 +69,9 @@ def load_weights(model):
     try:
         model.load_weights(fname)
     except FileNotFoundError:
-        print('Warning: file not found.')
+        print('Warning: File not found.')
     except ValueError:
-        print('Warning: unable to load weights.')
+        print('Warning: Unable to load weights.')
 
 # -----------------------------------------------------------------------------
 
