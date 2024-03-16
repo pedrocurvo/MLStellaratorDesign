@@ -72,28 +72,24 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-while True:
-    try:
-        model = create_model(X.shape[1], Y.shape[1])
-        model.summary()
+model = create_model(X.shape[1], Y.shape[1])
+model.summary()
 
-#       load_weights(model)
+load_weights(model)
 
-        epochs = 2000
-        cb = callback()
-        tb = TensorBoard(write_graph=False)
+epochs = 2000
+cb = callback()
+tb = TensorBoard(write_graph=False)
 
-        model.fit(X_train, Y_train,
-                  batch_size=batch_size,
-                  epochs=epochs,
-                  verbose=0,
-                  validation_data=(X_valid, Y_valid),
-                  callbacks=[cb, tb])
+try:
+    model.fit(X_train, Y_train,
+              batch_size=batch_size,
+              epochs=epochs,
+              verbose=0,
+              validation_data=(X_valid, Y_valid),
+              callbacks=[cb, tb])
+except:
+    print('Training interrupted.')
 
-        model.set_weights(cb.get_weights())
-        save_weights(model)
-
-    except KeyboardInterrupt:
-        model.set_weights(cb.get_weights())
-        save_weights(model)
-        break
+model.set_weights(cb.get_weights())
+save_weights(model)

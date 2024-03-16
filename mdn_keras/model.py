@@ -1,4 +1,3 @@
-import os
 import time
 import numpy as np
 
@@ -49,9 +48,8 @@ def create_model(input_dim, output_dim):
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
                     for i in range(K)])))
 
-    # optimizer, learning rate, and loss function
-    lr = 1e-4
-    print('learning rate:', lr)
+    # learning rate, optimizer and loss function
+    lr = 1e-3
     opt = Adam(learning_rate=lr)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
@@ -67,14 +65,13 @@ def save_weights(model):
 
 def load_weights(model):
     fname = 'model_weights.h5'
-    if os.path.isfile(fname):
-        print('Reading:', fname)
-        try:
-            model.load_weights(fname)
-        except ValueError as error:
-            print(error)
-    else:
-        print('File not found:', fname)
+    print('Reading:', fname)
+    try:
+        model.load_weights(fname)
+    except FileNotFoundError:
+        print('Warning: file not found.')
+    except ValueError:
+        print('Warning: unable to load weights.')
 
 # -----------------------------------------------------------------------------
 
