@@ -2,9 +2,8 @@ import os
 import time
 import numpy as np
 
-from keras.backend import sin
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Input, Dense
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
@@ -23,16 +22,18 @@ def create_model(input_dim, output_dim):
     params_size = loc_size + scale_size
 
     # number of components for the mixture model
-    K = 32
+    K = 62
     units = K + K * params_size
 
     # neural network
-    model.add(Dense(32, activation='tanh', input_dim=input_dim))
+    model.add(Input(shape=(input_dim,)))
+    model.add(Dense(32, activation='tanh'))
     model.add(Dense(64, activation='tanh'))
     model.add(Dense(128, activation='tanh'))
     model.add(Dense(256, activation='tanh'))
     model.add(Dense(512, activation='tanh'))
     model.add(Dense(1024, activation='tanh'))
+    model.add(Dense(2048, activation='tanh'))
     model.add(Dense(units))
 
     # mixture model
