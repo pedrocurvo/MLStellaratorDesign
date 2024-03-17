@@ -71,11 +71,11 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-learning_rate = 1e-3
+learning_rate = 1e-2
 
 interrupt = False
 
-while not interrupt:
+while (learning_rate > 0.) and (interrupt == False):
     print('learning_rate:', learning_rate)
     model = create_model(X.shape[1], Y.shape[1], learning_rate)
     model.summary()
