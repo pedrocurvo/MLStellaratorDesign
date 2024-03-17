@@ -71,7 +71,9 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-learning_rate = 1e-2
+initial_rate = 1e-2
+
+learning_rate = initial_rate
 
 interrupt = False
 
@@ -80,7 +82,8 @@ while (learning_rate > 0.) and (interrupt == False):
     model = create_model(X.shape[1], Y.shape[1], learning_rate)
     model.summary()
 
-    load_weights(model)
+    if learning_rate != initial_rate:
+        load_weights(model)
 
     epochs = 1000
     cb = callback()
