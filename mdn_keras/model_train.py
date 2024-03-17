@@ -71,7 +71,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-learning_rate = 1e-2
+learning_rate = 1e-3
 
 interrupt = False
 
@@ -99,4 +99,4 @@ while not interrupt:
     model.set_weights(cb.get_weights())
     save_weights(model)
 
-    learning_rate /= 10.**0.25
+    learning_rate = np.round(learning_rate / np.sqrt(10.), 10)
