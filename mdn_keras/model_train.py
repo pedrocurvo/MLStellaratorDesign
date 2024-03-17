@@ -82,7 +82,7 @@ while not interrupt:
 
     load_weights(model)
 
-    epochs = 2000
+    epochs = 1000
     cb = callback()
     tb = TensorBoard(write_graph=False)
 
@@ -99,4 +99,4 @@ while not interrupt:
     model.set_weights(cb.get_weights())
     save_weights(model)
 
-    learning_rate *= 0.1
+    learning_rate = np.round(learning_rate / np.sqrt(10.), 10)
