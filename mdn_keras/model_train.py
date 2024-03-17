@@ -85,7 +85,7 @@ while (learning_rate >= 1e-7) and (interrupt == False):
     if learning_rate != initial_rate:
         load_weights(model)
 
-    epochs = 1000
+    epochs = 200
     cb = callback()
     tb = TensorBoard(write_graph=False)
 
