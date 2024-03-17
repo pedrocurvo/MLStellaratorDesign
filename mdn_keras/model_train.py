@@ -71,7 +71,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-initial_rate = 1e-2
+initial_rate = 1e-3
 
 learning_rate = initial_rate
 
