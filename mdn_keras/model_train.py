@@ -77,7 +77,7 @@ learning_rate = initial_rate
 
 interrupt = False
 
-while (learning_rate > 0.) and (interrupt == False):
+while (learning_rate >= 1e-7) and (interrupt == False):
     print('learning_rate:', learning_rate)
     model = create_model(X.shape[1], Y.shape[1], learning_rate)
     model.summary()
@@ -102,4 +102,4 @@ while (learning_rate > 0.) and (interrupt == False):
     model.set_weights(cb.get_weights())
     save_weights(model)
 
-    learning_rate = np.round(learning_rate / np.sqrt(10.), 10)
+    learning_rate = np.round(learning_rate / 10.**0.25, 15)
