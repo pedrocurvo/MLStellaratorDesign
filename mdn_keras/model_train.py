@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 
 from keras.callbacks import TensorBoard
 
@@ -72,24 +71,32 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-model = create_model(X.shape[1], Y.shape[1])
-model.summary()
+learning_rate = 1e-2
 
-load_weights(model)
+interrupt = False
 
-epochs = 2000
-cb = callback()
-tb = TensorBoard(write_graph=False)
+while not interrupt:
+    print('learning_rate:', learning_rate)
+    model = create_model(X.shape[1], Y.shape[1], learning_rate)
+    model.summary()
 
-try:
-    model.fit(X_train, Y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              verbose=0,
-              validation_data=(X_valid, Y_valid),
-              callbacks=[cb, tb])
-except:
-    print('Training interrupted.')
+    load_weights(model)
 
-model.set_weights(cb.get_weights())
-save_weights(model)
+    epochs = 2000
+    cb = callback()
+    tb = TensorBoard(write_graph=False)
+
+    try:
+        model.fit(X_train, Y_train,
+                batch_size=batch_size,
+                epochs=epochs,
+                verbose=0,
+                validation_data=(X_valid, Y_valid),
+                callbacks=[cb, tb])
+    except KeyboardInterrupt:
+        interrupt = True
+
+    model.set_weights(cb.get_weights())
+    save_weights(model)
+
+    learning_rate /= 10.**0.25

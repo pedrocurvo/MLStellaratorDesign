@@ -12,7 +12,7 @@ from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
-def create_model(input_dim, output_dim):
+def create_model(input_dim, output_dim, learning_rate):
     model = Sequential()
 
     # number of parameters for each component of the mixture model
@@ -48,10 +48,8 @@ def create_model(input_dim, output_dim):
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
                     for i in range(K)])))
 
-    # learning rate, optimizer and loss function
-    lr = 1e-4
-    print('learning_rate:', lr)
-    opt = Adam(learning_rate=lr)
+    # optimizer and loss function
+    opt = Adam(learning_rate)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
 
