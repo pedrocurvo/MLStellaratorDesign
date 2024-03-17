@@ -75,7 +75,7 @@ learning_rate = 1e-2
 
 interrupt = False
 
-while learning_rate and not interrupt:
+while (learning_rate > 0.) and (interrupt == False):
     print('learning_rate:', learning_rate)
     model = create_model(X.shape[1], Y.shape[1], learning_rate)
     model.summary()
