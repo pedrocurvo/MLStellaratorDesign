@@ -99,4 +99,4 @@ while not interrupt:
     model.set_weights(cb.get_weights())
     save_weights(model)
 
-    learning_rate = np.round(learning_rate / np.sqrt(10.), 10)
+    learning_rate *= 0.1
