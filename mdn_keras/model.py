@@ -49,7 +49,7 @@ def create_model(input_dim, output_dim):
                     for i in range(K)])))
 
     # learning rate, optimizer and loss function
-    lr = 1e-4
+    lr = 1e-3
     opt = Adam(learning_rate=lr)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)

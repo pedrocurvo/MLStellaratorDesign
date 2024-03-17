@@ -50,7 +50,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-steps_per_epoch = 1000
+steps_per_epoch = 500
 
 batch_size = X_train.shape[0] // steps_per_epoch
 print('batch_size:', batch_size)
