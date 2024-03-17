@@ -1,9 +1,8 @@
-import os
 import time
 import numpy as np
 
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Input, Dense
 from keras.optimizers import Adam
 from keras.callbacks import Callback
 
@@ -13,7 +12,7 @@ from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
-def create_model(input_dim, output_dim):
+def create_model(input_dim, output_dim, learning_rate):
     model = Sequential()
 
     # number of parameters for each component of the mixture model
@@ -22,13 +21,18 @@ def create_model(input_dim, output_dim):
     params_size = loc_size + scale_size
 
     # number of components for the mixture model
-    K = 10
+    K = 62
     units = K + K * params_size
 
     # neural network
-    model.add(Dense(units, activation='tanh', input_dim=input_dim))
-    model.add(Dense(units, activation='tanh'))
-    model.add(Dense(units, activation='tanh'))
+    model.add(Input(shape=(input_dim,)))
+    model.add(Dense(32, activation='tanh'))
+    model.add(Dense(64, activation='tanh'))
+    model.add(Dense(128, activation='tanh'))
+    model.add(Dense(256, activation='tanh'))
+    model.add(Dense(512, activation='tanh'))
+    model.add(Dense(1024, activation='tanh'))
+    model.add(Dense(2048, activation='tanh'))
     model.add(Dense(units))
 
     # mixture model
@@ -44,10 +48,8 @@ def create_model(input_dim, output_dim):
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
                     for i in range(K)])))
 
-    # optimizer, learning rate, and loss function
-    lr = 1e-4
-    print('learning rate:', lr)
-    opt = Adam(learning_rate=lr)
+    # optimizer and loss function
+    opt = Adam(learning_rate)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
 
@@ -62,11 +64,13 @@ def save_weights(model):
 
 def load_weights(model):
     fname = 'model_weights.h5'
-    if os.path.isfile(fname):
-        print('Reading:', fname)
+    print('Reading:', fname)
+    try:
         model.load_weights(fname)
-    else:
-        print('Not found:', fname)
+    except FileNotFoundError:
+        print('Warning: File not found.')
+    except ValueError:
+        print('Warning: Unable to load weights.')
 
 # -----------------------------------------------------------------------------
 
@@ -75,14 +79,17 @@ class callback(Callback):
     def on_train_begin(self, logs=None):
         self.min_val_loss = None
         self.min_val_weights = self.model.get_weights()
+        print('%-10s %10s %10s %10s' % ('time', 'epoch', 'loss', 'val_loss'))
         
     def on_epoch_end(self, epoch, logs=None):
         t = time.strftime('%H:%M:%S')
         loss = logs['loss']
         val_loss = logs['val_loss']
 
-        if self.min_val_loss == None:
-            print('%-10s %10s %10s %10s' % ('time', 'epoch', 'loss', 'val_loss'))
+        if np.isnan(loss) or np.isnan(val_loss):
+            print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
+            self.model.stop_training = True
+            return
 
         if (self.min_val_loss == None) or (val_loss < self.min_val_loss):
             self.min_val_loss = val_loss
@@ -90,9 +97,6 @@ class callback(Callback):
             print('%-10s %10d %10.6f %10.6f *' % (t, epoch, loss, val_loss))
         else:
             print('%-10s %10d %10.6f %10.6f' % (t, epoch, loss, val_loss))
-
-        if np.isnan(loss) or np.isnan(val_loss):
-            self.model.stop_training = True
 
     def get_weights(self):
         return self.min_val_weights
