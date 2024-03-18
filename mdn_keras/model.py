@@ -78,7 +78,7 @@ class callback(Callback):
     
     def on_train_begin(self, logs=None):
         print('%-10s %10s %12s %12s' % ('time', 'epoch', 'loss', 'val_loss'))
-        
+
     def on_epoch_end(self, epoch, logs=None):
         t = time.strftime('%H:%M:%S')
         loss = logs['loss']
