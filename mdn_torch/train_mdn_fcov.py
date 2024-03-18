@@ -80,7 +80,7 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_11_13_56_12.pth"))
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_18_01_53_03.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.6)
+    scheduler = None #torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.6)
 
 
     # Create the writer for TensorBoard with help from utils.py
