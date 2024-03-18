@@ -49,7 +49,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-steps_per_epoch = 500
+steps_per_epoch = 1000
 
 batch_size = X_train.shape[0] // steps_per_epoch
 print('batch_size:', batch_size)
@@ -71,7 +71,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-initial_rate = 1e-3
+initial_rate = 1e-4
 
 learning_rate = initial_rate
 
@@ -82,8 +82,7 @@ while (learning_rate >= 1e-7) and (interrupt == False):
     model = create_model(X.shape[1], Y.shape[1], learning_rate)
     model.summary()
 
-    if learning_rate != initial_rate:
-        load_weights(model)
+    load_weights(model)
 
     epochs = 200
     cb = callback()
@@ -91,15 +90,14 @@ while (learning_rate >= 1e-7) and (interrupt == False):
 
     try:
         model.fit(X_train, Y_train,
-                batch_size=batch_size,
-                epochs=epochs,
-                verbose=0,
-                validation_data=(X_valid, Y_valid),
-                callbacks=[cb, tb])
+                 batch_size=batch_size,
+                 epochs=epochs,
+                 verbose=1,
+                 validation_data=(X_valid, Y_valid),
+                 callbacks=[cb, tb])
     except KeyboardInterrupt:
         interrupt = True
 
-    model.set_weights(cb.get_weights())
     save_weights(model)
 
     learning_rate = np.round(learning_rate / 10.**0.25, 15)
