@@ -1,4 +1,5 @@
 import torch
+import torch_optimizer as optim
 
 # Add Parent Directory to Python Path
 # Inside your Python script within the external_package directory
@@ -83,12 +84,20 @@ if __name__ == "__main__":
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
-    optimizer = torch.optim.Adam(model.parameters(),
-                                lr=LEARNING_RATE,
-                                eps=1e-06,
-                                amsgrad=True,
-                                weight_decay=0
-    )
+    # optimizer = torch.optim.Adam(model.parameters(),
+    #                             lr=LEARNING_RATE,
+    #                             eps=1e-06,
+    #                             amsgrad=True,
+    #                             weight_decay=0
+    # )
+
+    optimizer = optim.Adahessian(model.parameters(),
+                                lr= LEARNING_RATE,
+                                betas= (0.9, 0.999),
+                                eps= 1e-6,
+                                weight_decay=0.0,
+                                hessian_power=1.0,
+    )   
     # optimizer=torch.optim.RMSprop(model.parameters(),
     #                               lr=LEARNING_RATE,
     #                               alpha=0.9, eps=1e-07,
