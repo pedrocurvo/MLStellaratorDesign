@@ -90,11 +90,11 @@ while (learning_rate >= 1e-7) and (interrupt == False):
 
     try:
         model.fit(X_train, Y_train,
-                 batch_size=batch_size,
-                 epochs=epochs,
-                 verbose=0,
-                 validation_data=(X_valid, Y_valid),
-                 callbacks=[cb, tb])
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  verbose=0,
+                  validation_data=(X_valid, Y_valid),
+                  callbacks=[cb, tb])
     except KeyboardInterrupt:
         interrupt = True
 
