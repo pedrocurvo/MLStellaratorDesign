@@ -71,33 +71,26 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-initial_rate = 1e-4
+learning_rate = 1e-5
+print('learning_rate:', learning_rate)
 
-learning_rate = initial_rate
+model = create_model(X.shape[1], Y.shape[1], learning_rate)
+model.summary()
 
-interrupt = False
+load_weights(model)
 
-while (learning_rate >= 1e-7) and (interrupt == False):
-    print('learning_rate:', learning_rate)
-    model = create_model(X.shape[1], Y.shape[1], learning_rate)
-    model.summary()
+epochs = 2000
+cb = callback()
+tb = TensorBoard(write_graph=False)
 
-    load_weights(model)
+try:
+    model.fit(X_train, Y_train,
+              batch_size=batch_size,
+              epochs=epochs,
+              verbose=0,
+              validation_data=(X_valid, Y_valid),
+              callbacks=[cb, tb])
+except KeyboardInterrupt:
+    print('Training interrupted.')
 
-    epochs = 200
-    cb = callback()
-    tb = TensorBoard(write_graph=False)
-
-    try:
-        model.fit(X_train, Y_train,
-                  batch_size=batch_size,
-                  epochs=epochs,
-                  verbose=0,
-                  validation_data=(X_valid, Y_valid),
-                  callbacks=[cb, tb])
-    except KeyboardInterrupt:
-        interrupt = True
-
-    save_weights(model)
-
-    learning_rate = np.round(learning_rate / 10.**0.25, 15)
+save_weights(model)
