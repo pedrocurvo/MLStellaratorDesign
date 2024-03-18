@@ -15,15 +15,32 @@ class MDNFullCovariance(nn.Module):
         self.num_gaussians = num_gaussians
         self.output_dim = output_dim
 
-        layers = []
-        layers.append(nn.Linear(input_dim, self.num_param))
-        layers.append(nn.Tanh())
+        # layers = []
+        # layers.append(nn.Linear(input_dim, self.num_param))
+        # layers.append(nn.Tanh())
 
-        for _ in range(hidden_layers_num):
-            layers.append(nn.Linear(self.num_param, self.num_param))
-            layers.append(nn.Tanh())
+        # for _ in range(hidden_layers_num):
+        #     layers.append(nn.Linear(self.num_param, self.num_param))
+        #     layers.append(nn.Tanh())
 
-        self.shared_layers = nn.Sequential(*layers)
+        # self.shared_layers = nn.Sequential(*layers)
+
+        self.shared_layers = nn.Sequential(
+            nn.Linear(input_dim, 64),
+            nn.Tanh(),
+            nn.Linear(64, 128),
+            nn.Tanh(),
+            nn.Linear(128, 256),
+            nn.Tanh(),
+            nn.Linear(256, 512),
+            nn.Tanh(),
+            nn.Linear(512, 1024),
+            nn.Tanh(),
+            nn.Linear(1024, 2048),
+            nn.Tanh(),
+            nn.Linear(2048, 4096),
+            nn.Tanh(),
+        )
 
 
 
@@ -52,10 +69,10 @@ class MDNFullCovariance(nn.Module):
         #     nn.Tanh(),
         #     # Add more? 
         # )
-        self.mu = nn.Linear(self.num_param, output_dim * num_gaussians)
-        self.sigma_not_in_diagonal = nn.Linear(self.num_param, int(num_gaussians * (output_dim * (output_dim-1)) / 2))
-        self.sigma_diag = nn.Linear(self.num_param, num_gaussians * output_dim)
-        self.pi = nn.Linear(self.num_param, num_gaussians)
+        self.mu = nn.Linear(4096, output_dim * num_gaussians)
+        self.sigma_not_in_diagonal = nn.Linear(4096, int(num_gaussians * (output_dim * (output_dim-1)) / 2))
+        self.sigma_diag = nn.Linear(4096, num_gaussians * output_dim)
+        self.pi = nn.Linear(4096, num_gaussians)
     
     def forward(self, x):
         x = self.shared_layers(x)

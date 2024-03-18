@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Create model
     model = MDNFullCovariance(input_dim=10,
                             output_dim=10,
-                            num_gaussians=50
+                            num_gaussians=64
     ).to(device)
 
     # Initialize the weights of the model
