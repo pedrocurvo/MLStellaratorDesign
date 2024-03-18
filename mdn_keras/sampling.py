@@ -107,21 +107,14 @@ def check_criteria(output):
 # -----------------------------------------------------------------------------
 
 def sample_output(dataset):
+    cols = ['axis_length', 'iota', 'max_elongation',
+            'min_L_grad_B', 'min_R0', 'r_singularity',
+            'L_grad_grad_B', 'B20_variation', 'beta',
+            'DMerc_times_r2']
 
-    axis_length    = np.random.choice(dataset['axis_length'   ].values)
-    iota           = np.random.choice(dataset['iota'          ].values)
-    max_elongation = np.random.choice(dataset['max_elongation'].values)
-    min_L_grad_B   = np.random.choice(dataset['min_L_grad_B'  ].values)
-    min_R0         = np.random.choice(dataset['min_R0'        ].values)
-    r_singularity  = np.random.choice(dataset['r_singularity' ].values)
-    L_grad_grad_B  = np.random.choice(dataset['L_grad_grad_B' ].values)
-    B20_variation  = np.random.choice(dataset['B20_variation' ].values)
-    beta           = np.random.choice(dataset['beta'          ].values)
-    DMerc_times_r2 = np.random.choice(dataset['DMerc_times_r2'].values)
+    sample = [np.random.choice(dataset[col].values) for col in cols]
 
-    sample = [axis_length, iota, max_elongation,
-              min_L_grad_B, min_R0, r_singularity,
-              L_grad_grad_B, B20_variation, beta,
-              DMerc_times_r2]
+#    idx = np.random.choice(dataset.index.values)
+#    sample = dataset.loc[idx][cols].to_list()
 
     return sample

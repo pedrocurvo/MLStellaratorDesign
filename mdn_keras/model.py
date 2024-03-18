@@ -12,7 +12,7 @@ from tensorflow_probability.python.bijectors import FillScaleTriL
 
 # -----------------------------------------------------------------------------
 
-def create_model(input_dim, output_dim, learning_rate):
+def create_model(input_dim, output_dim, learning_rate=1e-4):
     model = Sequential()
 
     # number of parameters for each component of the mixture model
@@ -75,14 +75,26 @@ def load_weights(model):
 # -----------------------------------------------------------------------------
 
 class callback(Callback):
-    
+
     def on_train_begin(self, logs=None):
+        self.min_val_loss = np.inf
+        self.min_val_weights = self.model.get_weights()
         print('%-10s %10s %12s %12s' % ('time', 'epoch', 'loss', 'val_loss'))
 
     def on_epoch_end(self, epoch, logs=None):
         t = time.strftime('%H:%M:%S')
         loss = logs['loss']
         val_loss = logs['val_loss']
-        print('%-10s %10d %12.6f %12.6f' % (t, epoch, loss, val_loss))
+
+        if val_loss < self.min_val_loss:
+            self.min_val_loss = val_loss
+            self.min_val_weights = self.model.get_weights()
+            print('%-10s %10d %12.6f %12.6f *' % (t, epoch, loss, val_loss))
+        else:
+            print('%-10s %10d %12.6f %12.6f' % (t, epoch, loss, val_loss))
+
         if np.isnan(loss) or np.isnan(val_loss):
             self.model.stop_training = True
+
+    def get_weights(self):
+        return self.min_val_weights

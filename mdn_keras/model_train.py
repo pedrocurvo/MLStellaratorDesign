@@ -93,4 +93,6 @@ try:
 except KeyboardInterrupt:
     print('Training interrupted.')
 
+model.set_weights(cb.get_weights())
+
 save_weights(model)
