@@ -49,7 +49,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-steps_per_epoch = 1000
+steps_per_epoch = 500
 
 batch_size = X_train.shape[0] // steps_per_epoch
 print('batch_size:', batch_size)
@@ -92,7 +92,7 @@ while (learning_rate >= 1e-7) and (interrupt == False):
         model.fit(X_train, Y_train,
                  batch_size=batch_size,
                  epochs=epochs,
-                 verbose=1,
+                 verbose=0,
                  validation_data=(X_valid, Y_valid),
                  callbacks=[cb, tb])
     except KeyboardInterrupt:
