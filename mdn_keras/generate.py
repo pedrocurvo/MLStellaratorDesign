@@ -4,7 +4,7 @@ import tqdm
 import numpy as np
 import pandas as pd
 
-from sampling import sample_input, run_qsc
+from sampling import *
 
 # -----------------------------------------------------------------------------
 # open the output file for writing or appending

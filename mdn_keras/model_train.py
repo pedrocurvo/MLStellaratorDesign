@@ -3,7 +3,7 @@ import pandas as pd
 
 from keras.callbacks import TensorBoard
 
-from model import create_model, load_weights, save_weights, callback
+from model import *
 
 # -----------------------------------------------------------------------------
 
@@ -72,14 +72,12 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 # -----------------------------------------------------------------------------
 
 learning_rate = 1e-4
-print('learning_rate:', learning_rate)
 
 model = create_model(X.shape[1], Y.shape[1], learning_rate)
-model.summary()
 
 load_weights(model)
 
-epochs = 2000
+epochs = 2500
 cb = callback()
 tb = TensorBoard(write_graph=False)
 
@@ -90,9 +88,10 @@ try:
               verbose=0,
               validation_data=(X_valid, Y_valid),
               callbacks=[cb, tb])
+
 except KeyboardInterrupt:
     print('Training interrupted.')
 
-model.set_weights(cb.get_weights())
+model.set_weights(cb.min_val_weights)
 
 save_weights(model)

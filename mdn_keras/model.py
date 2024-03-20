@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 
@@ -48,7 +49,11 @@ def create_model(input_dim, output_dim, learning_rate=1e-4):
                 t[...,K+i*params_size+loc_size:K+i*params_size+loc_size+scale_size]))
                     for i in range(K)])))
 
-    # optimizer and loss function
+    # print model
+    model.summary()
+
+    # learning rate, optimizer and loss function
+    print('learning_rate:', learning_rate)
     opt = Adam(learning_rate)
     loss = lambda y, rv: -rv.log_prob(y)
     model.compile(optimizer=opt, loss=loss)
@@ -64,13 +69,9 @@ def save_weights(model):
 
 def load_weights(model):
     fname = 'model_weights.h5'
-    print('Reading:', fname)
-    try:
+    if os.path.isfile(fname):
+        print('Reading:', fname)
         model.load_weights(fname)
-    except FileNotFoundError:
-        print('Warning: File not found.')
-    except ValueError:
-        print('Warning: Unable to load weights.')
 
 # -----------------------------------------------------------------------------
 
@@ -95,6 +96,3 @@ class callback(Callback):
 
         if np.isnan(loss) or np.isnan(val_loss):
             self.model.stop_training = True
-
-    def get_weights(self):
-        return self.min_val_weights
