@@ -93,16 +93,21 @@ def check_criteria(output):
      L_grad_grad_B, B20_variation, beta,
      DMerc_times_r2] = output
 
-    assert axis_length > 0.
-    assert np.fabs(iota) >= 0.2
-    assert max_elongation <= 10.
-    assert np.fabs(min_L_grad_B) >= 0.1
-    assert np.fabs(min_R0) >= 0.3
-    assert r_singularity >= 0.05
-    assert np.fabs(L_grad_grad_B) >= 0.1
-    assert B20_variation <= 5.
-    assert beta >= 1e-4
-    assert DMerc_times_r2 > 0.
+    try:
+        assert axis_length > 0.
+        assert np.fabs(iota) >= 0.2
+        assert max_elongation <= 10.
+        assert np.fabs(min_L_grad_B) >= 0.1
+        assert np.fabs(min_R0) >= 0.3
+        assert r_singularity >= 0.05
+        assert np.fabs(L_grad_grad_B) >= 0.1
+        assert B20_variation <= 5.
+        assert beta >= 1e-4
+        assert DMerc_times_r2 > 0.
+        return True
+
+    except AssertionError:
+        return False
 
 # -----------------------------------------------------------------------------
 
@@ -113,8 +118,5 @@ def sample_output(dataset):
             'DMerc_times_r2']
 
     sample = [np.random.choice(dataset[col].values) for col in cols]
-
-#    idx = np.random.choice(dataset.index.values)
-#    sample = dataset.loc[idx][cols].to_list()
 
     return sample

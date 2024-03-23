@@ -1,11 +1,19 @@
 import os
-import tqdm
+import signal
+import multiprocessing
 
 import numpy as np
 import pandas as pd
 
 from model import *
 from sampling import *
+
+# -----------------------------------------------------------------------------
+
+def ignore_sigint():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+cpus = multiprocessing.cpu_count()
 
 # -----------------------------------------------------------------------------
 
@@ -22,11 +30,11 @@ std = df.std()
 
 dim = 10
 
-X_mean = mean[dim:].values
-Y_mean = mean[:dim].values
+X_mean = mean.values[dim:]
+Y_mean = mean.values[:dim]
 
-X_std = std[dim:].values
-Y_std = std[:dim].values
+X_std = std.values[dim:]
+Y_std = std.values[:dim]
 
 print('X_mean:', X_mean.shape, X_mean.dtype)
 print('Y_mean:', Y_mean.shape, Y_mean.dtype)
@@ -36,23 +44,18 @@ print('Y_std:', Y_std.shape, Y_std.dtype)
 
 # -----------------------------------------------------------------------------
 
-passed = []
+outputs = df[df.columns[dim:]].values.tolist()
 
-for idx, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
-    try:
-        output = row[dim:].values
-        check_criteria(output)
-        passed.append(idx)
-    except AssertionError:
-        continue
+with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
+    mask = pool.map(check_criteria, outputs)
 
-df = df.iloc[passed]
+df = df.iloc[mask]
 
 print('df:', df.shape)
 
 # -----------------------------------------------------------------------------
 
-model = create_model(X_mean.shape[0], Y_mean.shape[0])
+model = create_model(dim, dim)
 
 model.summary()
 
@@ -65,57 +68,57 @@ print('Writing:', fname)
 
 if not os.path.isfile(fname):
     f = open(fname, 'w')
-    fields = df.columns.values
-    print(','.join(fields), file=f)
+    print(','.join(df.columns), file=f)
 else:
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
 
-batch_size = 2000
+with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
 
-n_passed = 0
-n_failed = 0
+    batch_size = 5000
 
-while True:
-    try:
-        X_batch = np.array([sample_output(df) for _ in range(batch_size)])
-        X_batch = X_batch - X_mean
-        X_batch = X_batch / X_std
-        X_batch = X_batch.astype(np.float32)
+    n_passed = 0
+    n_failed = 0
 
-        Y_batch = model.predict(X_batch, batch_size=batch_size, verbose=0)
-        Y_batch = Y_batch * Y_std
-        Y_batch = Y_batch + Y_mean
+    while True:
+        try:
+            X_batch = pool.map(sample_output, [df]*batch_size)
+            X_batch = np.array(X_batch)
+            X_batch = X_batch - X_mean
+            X_batch = X_batch / X_std
+            X_batch = X_batch.astype(np.float32)
 
-        for sample in Y_batch:
-            try:
-                sample = round_nfp(sample)
-                output = run_qsc(sample)
-            except Warning:
-                continue
+            Y_batch = model.predict(X_batch, batch_size=batch_size, verbose=0)
+            Y_batch = Y_batch * Y_std
+            Y_batch = Y_batch + Y_mean
 
-            try:
-                assert not np.isnan(output).any()
-                assert not np.isinf(output).any()
+            for sample in Y_batch:
+                try:
+                    sample = round_nfp(sample)
+                    output = run_qsc(sample)
+                except Warning:
+                    continue
 
-                check_criteria(output)
-                n_passed += 1
+                try:
+                    assert not np.isnan(output).any()
+                    assert not np.isinf(output).any()
+                    assert check_criteria(output)
+                    n_passed += 1
 
-                values = np.concatenate([sample, output], dtype=str)
-                print(','.join(values), file=f)
+                    values = np.concatenate([sample, output], dtype=str)
+                    print(','.join(values), file=f)
 
-            except AssertionError:
-                n_failed += 1
+                except AssertionError:
+                    n_failed += 1
 
-            n_total = n_passed + n_failed
-            percent = n_passed / n_total * 100.
-            print('\rPassed: %d/%d (%.6f %%) ' % (n_passed, n_total, percent), end='')
+                n_total = n_passed + n_failed
+                percent = n_passed / n_total * 100.
+                print('\rPassed: %d/%d (%.6f %%) ' % (n_passed, n_total, percent), end='')
 
-    except KeyboardInterrupt:
-        break
-
-print()
+        except KeyboardInterrupt:
+            print()
+            break
 
 # -----------------------------------------------------------------------------
 # close the output file
