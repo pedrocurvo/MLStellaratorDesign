@@ -57,8 +57,6 @@ print('df:', df.shape)
 
 model = create_model(dim, dim)
 
-model.summary()
-
 load_weights(model)
 
 # -----------------------------------------------------------------------------
@@ -104,6 +102,7 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
                     assert not np.isnan(output).any()
                     assert not np.isinf(output).any()
                     assert check_criteria(output)
+
                     n_passed += 1
 
                     values = np.concatenate([sample, output], dtype=str)
