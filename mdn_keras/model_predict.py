@@ -23,6 +23,7 @@ df = pd.read_csv(fname)
 
 # -----------------------------------------------------------------------------
 
+size = df.shape[0]
 mean = df.mean()
 std = df.std()
 
@@ -67,8 +68,16 @@ print('Writing:', fname)
 if not os.path.isfile(fname):
     f = open(fname, 'w')
     print(','.join(df.columns), file=f)
+    n_passed = 0
+    n_failed = 0
 else:
     f = open(fname, 'a')
+    df = pd.read_csv(fname)
+    outputs = df[df.columns[dim:]].values.tolist()
+    with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
+        mask = pool.map(check_criteria, outputs)
+    n_passed = mask.count(True)
+    n_failed = mask.count(False)
 
 # -----------------------------------------------------------------------------
 
@@ -76,10 +85,7 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
 
     batch_size = 5000
 
-    n_passed = 0
-    n_failed = 0
-
-    while n_passed + n_failed < df.shape[0]:
+    while n_passed + n_failed < size:
         try:
             X_batch = pool.map(sample_output, [dataset]*batch_size)
             X_batch = np.array(X_batch)
