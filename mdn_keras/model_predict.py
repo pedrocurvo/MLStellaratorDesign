@@ -101,20 +101,24 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
                 try:
                     sample = round_nfp(sample)
                     output = run_qsc(sample)
+
+                    assert not np.isnan(output).any()
+                    assert not np.isinf(output).any()
+                    assert not (np.fabs(output) > np.finfo(np.float32).max).any()
+
                 except Warning:
                     continue
 
-                try:
-                    assert not np.isnan(output).any()
-                    assert not np.isinf(output).any()
-                    assert check_criteria(output)
-                    n_passed += 1
-
                 except AssertionError:
-                    n_failed += 1
+                    continue
 
                 values = np.concatenate([sample, output], dtype=str)
                 print(','.join(values), file=f)
+
+                if check_criteria(output):
+                    n_passed += 1
+                else:
+                    n_failed += 1
 
                 n_total = n_passed + n_failed
                 percent = n_passed / n_total * 100.
