@@ -49,9 +49,9 @@ outputs = df[df.columns[dim:]].values.tolist()
 with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
     mask = pool.map(check_criteria, outputs)
 
-df = df.iloc[mask]
+dataset = df.iloc[mask]
 
-print('df:', df.shape)
+print('dataset:', dataset.shape)
 
 # -----------------------------------------------------------------------------
 
@@ -79,9 +79,9 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
     n_passed = 0
     n_failed = 0
 
-    while True:
+    while n_passed + n_failed < df.shape[0]:
         try:
-            X_batch = pool.map(sample_output, [df]*batch_size)
+            X_batch = pool.map(sample_output, [dataset]*batch_size)
             X_batch = np.array(X_batch)
             X_batch = X_batch - X_mean
             X_batch = X_batch / X_std
@@ -102,14 +102,13 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
                     assert not np.isnan(output).any()
                     assert not np.isinf(output).any()
                     assert check_criteria(output)
-
                     n_passed += 1
-
-                    values = np.concatenate([sample, output], dtype=str)
-                    print(','.join(values), file=f)
 
                 except AssertionError:
                     n_failed += 1
+
+                values = np.concatenate([sample, output], dtype=str)
+                print(','.join(values), file=f)
 
                 n_total = n_passed + n_failed
                 percent = n_passed / n_total * 100.
