@@ -45,10 +45,13 @@ print('Y_std:', Y_std.shape, Y_std.dtype)
 
 # -----------------------------------------------------------------------------
 
-outputs = df[df.columns[dim:]].values.tolist()
+def get_criteria_mask(df):
+    outputs = df[df.columns[dim:]].values.tolist()
+    with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
+        mask = pool.map(check_criteria, outputs)
+    return mask
 
-with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
-    mask = pool.map(check_criteria, outputs)
+mask = get_criteria_mask(df)
 
 dataset = df.iloc[mask]
 
@@ -66,25 +69,22 @@ fname = 'predict.csv'
 print('Writing:', fname)
 
 if not os.path.isfile(fname):
-    f = open(fname, 'w')
-    print(','.join(df.columns), file=f)
     n_passed = 0
     n_failed = 0
+    f = open(fname, 'w')
+    print(','.join(df.columns), file=f)
 else:
-    f = open(fname, 'a')
     df = pd.read_csv(fname)
-    outputs = df[df.columns[dim:]].values.tolist()
-    with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
-        mask = pool.map(check_criteria, outputs)
+    mask = get_criteria_mask(df)
     n_passed = mask.count(True)
     n_failed = mask.count(False)
+    f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
 
+batch_size = 5000
+
 with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
-
-    batch_size = 5000
-
     while n_passed + n_failed < size:
         try:
             X_batch = pool.map(sample_output, [dataset]*batch_size)
@@ -129,12 +129,10 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
             break
 
 # -----------------------------------------------------------------------------
-# close the output file
 
 f.close()
 
 # -----------------------------------------------------------------------------
-# try reading the file
 
 df = pd.read_csv(fname)
 if len(df) > 0:
