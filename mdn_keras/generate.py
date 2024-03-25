@@ -25,7 +25,7 @@ if not os.path.isfile(fname):
 
 else:
     df = pd.read_csv(fname)
-    initial = df.shape[0] - 1
+    initial = df.shape[0]
     f = open(fname, 'a')
 
 # -----------------------------------------------------------------------------
