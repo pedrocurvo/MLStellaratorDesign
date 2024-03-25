@@ -125,8 +125,9 @@ with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
                 print('\rPassed: %d/%d (%.6f %%) ' % (n_passed, n_total, percent), end='')
 
         except KeyboardInterrupt:
-            print()
             break
+
+print()
 
 # -----------------------------------------------------------------------------
 
