@@ -71,7 +71,7 @@ print('Y_valid:', Y_valid.shape, Y_valid.dtype)
 
 # -----------------------------------------------------------------------------
 
-learning_rate = 1e-6
+learning_rate = 1e-4
 
 model = create_model(X.shape[1], Y.shape[1], learning_rate)
 
