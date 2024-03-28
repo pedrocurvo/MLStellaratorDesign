@@ -74,7 +74,8 @@ def train_step(epoch: int,
         optimizer.zero_grad()
 
         # 4. Loss backward
-        loss.backward(create_graph=True)
+        #loss.backward(create_graph=True)
+        loss.backward()
 
         # 5. Optimizer step
         optimizer.step()

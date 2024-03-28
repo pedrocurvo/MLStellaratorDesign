@@ -38,8 +38,8 @@ class MDNFullCovariance(nn.Module):
             nn.Tanh(),
             nn.Linear(1024, 2048),
             nn.Tanh(),
-            nn.Linear(2048, 4096),
-            nn.Tanh(),
+            # nn.Linear(2048, 4096),
+            # nn.Tanh(),
         )
 
 
@@ -69,10 +69,10 @@ class MDNFullCovariance(nn.Module):
         #     nn.Tanh(),
         #     # Add more? 
         # )
-        self.mu = nn.Linear(4096, output_dim * num_gaussians)
-        self.sigma_not_in_diagonal = nn.Linear(4096, int(num_gaussians * (output_dim * (output_dim-1)) / 2))
-        self.sigma_diag = nn.Linear(4096, num_gaussians * output_dim)
-        self.pi = nn.Linear(4096, num_gaussians)
+        self.mu = nn.Linear(2048, output_dim * num_gaussians)
+        self.sigma_not_in_diagonal = nn.Linear(2048, int(num_gaussians * (output_dim * (output_dim-1)) / 2))
+        self.sigma_diag = nn.Linear(2048, num_gaussians * output_dim)
+        self.pi = nn.Linear(2048, num_gaussians)
     
     def forward(self, x):
         x = self.shared_layers(x)
@@ -237,6 +237,56 @@ class MDNFullCovariance(nn.Module):
     #     return -torch.mean(log_gauss) 
 
     # ------------------------------------------------------------------------------------------------------------------
+    def getMixturesSample(self, features, device):
+        # Move the data to the device
+        features = features.to(device)
+
+        # Make predictions
+        parameters = self(features)
+        
+        # Separate the parameters
+        # Un-cat the parameters
+        mu = parameters[:, :self.output_dim * self.num_gaussians]
+        sigma_not_in_diagonal = parameters[:, self.output_dim * self.num_gaussians:self.output_dim * self.num_gaussians + int(self.num_gaussians * (self.output_dim * (self.output_dim-1)) / 2)]
+        sigma_diag = parameters[:, self.output_dim * self.num_gaussians + int(self.num_gaussians * (self.output_dim * (self.output_dim-1)) / 2):self.output_dim * self.num_gaussians + int(self.num_gaussians * (self.output_dim * (self.output_dim-1)) / 2) + self.num_gaussians * self.output_dim]
+        alpha = parameters[:, self.output_dim * self.num_gaussians + int(self.num_gaussians * (self.output_dim * (self.output_dim-1)) / 2) + self.num_gaussians * self.output_dim:]
+
+        # Reshape the parameters to have the correct dimensions
+        # Example: mu: (batch_size, output_dim, num_gaussians)
+        mu = mu.view(-1,  self.num_gaussians, self.output_dim)
+        sigma_not_in_diagonal = sigma_not_in_diagonal.view(-1, self.num_gaussians, int((self.output_dim * (self.output_dim-1)) / 2))
+        sigma_diag = sigma_diag.view(-1, self.num_gaussians, self.output_dim)
+        alpha = alpha.view(-1, self.num_gaussians)
+
+        # Tensor to store L (lower triangular matrix), filled with zeros
+        L = torch.zeros((sigma_diag.shape[0], self.num_gaussians, self.output_dim, self.output_dim),
+                        device=parameters.device,
+                        dtype=parameters.dtype)
+
+        # Compute the indices for the lower triangular portion
+        indices = torch.tril_indices(row=self.output_dim, col=self.output_dim, offset=-1,
+                                    device=parameters.device)
+
+        # Reshape sigma_not_in_diagonal to have the correct dimensions
+        sigma_not_in_diagonal = sigma_not_in_diagonal.view(sigma_not_in_diagonal.shape[0], self.num_gaussians, -1)
+
+        # Fill the lower triangular matrix
+        L[:, :, indices[0], indices[1]] = sigma_not_in_diagonal
+
+        # Add the diagonal to the lower triangular matrix, but first pass it through an activation function
+        L[:, :, torch.arange(self.output_dim), torch.arange(self.output_dim)] = nn.ELU()(sigma_diag) + 1 + 1e-6
+
+        # Pass sigma_not_in_diagonal and sigma_diag through torch.dist to create a MultivariateNormal distribution
+        mvn = dist.MultivariateNormal(mu, scale_tril=L)
+
+        # Use alphas to create a mixture of distributions
+        mix = dist.Categorical(alpha)
+        mixture = dist.MixtureSameFamily(mix, mvn)
+
+        return mixture.sample(sample_shape=torch.Size([1])).squeeze(0)
+
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Prediction Methods
     def predict(self, dataloader, device):
         """
@@ -254,25 +304,10 @@ class MDNFullCovariance(nn.Module):
                         unit="batch")
             for i, (features, labels) in pbar:
                 # Move the data to the device
-                features = features.to(device)
-                labels = labels.to(device)
+                mixture = self.getMixtures(features, device)
 
-                # Make predictions
-                parameters = self(features)
-                
-                # Separate the parameters
-                components = parameters.view(-1, self.output_dim + 2, self.num_gaussians)
-                mu_pred = components[:, :self.output_dim, :]
-                sigma_pred = components[:, self.output_dim, :]
-                alpha_pred = components[:, self.output_dim + 1, :]
-                # Sort alphas from highest to lower 
-                alpha_pred, indices = torch.sort(alpha_pred, dim=1)
-                alpha_pred = alpha_pred.cpu().numpy()
-                dim = alpha_pred.shape[1]
-                y_pred = np.zeros((len(mu_pred)))  
-                y_pred = np.array([mu_pred[i,:,np.random.choice(dim,p=alpha_pred[i])]  
-                    for i in np.arange(len(alpha_pred))])  
-                y_pred = torch.tensor(y_pred).to(device)
+                # Make predictions from the mixture
+                y_pred = mixture.sample(sample_shape=torch.Size([1])).squeeze(0)
 
                 # True labels
                 y_true_final = torch.cat([y_true_final, labels], dim=0)
