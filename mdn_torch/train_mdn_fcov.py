@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Create model
     model = MDNFullCovariance(input_dim=10,
                             output_dim=10,
-                            num_gaussians=64
+                            num_gaussians=62
     ).to(device)
 
     # Initialize the weights of the model
@@ -80,24 +80,24 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_18_01_53_03.pth"))
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
-    # optimizer = torch.optim.Adam(model.parameters(),
-    #                             lr=LEARNING_RATE,
-    #                             eps=1e-06,
-    #                             amsgrad=True,
-    #                             weight_decay=0
-    # )
+    optimizer = torch.optim.Adam(model.parameters(),
+                                lr=LEARNING_RATE,
+                                eps=1e-08,
+                                amsgrad=True,
+                                weight_decay=0
+    )
 
-    optimizer = optim.Adahessian(model.parameters(),
-                                lr= LEARNING_RATE,
-                                betas= (0.9, 0.999),
-                                eps= 1e-6,
-                                weight_decay=0.0,
-                                hessian_power=1.0,
-    )   
+    # optimizer = optim.Adahessian(model.parameters(),
+    #                             lr= LEARNING_RATE,
+    #                             betas= (0.9, 0.999),
+    #                             eps= 1e-8,
+    #                             weight_decay=0.0,
+    #                             hessian_power=0.5,
+    # )   
     # optimizer=torch.optim.RMSprop(model.parameters(),
     #                               lr=LEARNING_RATE,
     #                               alpha=0.9, eps=1e-07,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = None #torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30,35,40], gamma=0.6)
+    scheduler = None #torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,15,20,25,30,35,40,45], gamma=0.1)
 
 
     # Create the writer for TensorBoard with help from utils.py
