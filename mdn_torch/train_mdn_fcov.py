@@ -6,13 +6,6 @@ import torch_optimizer as optim
 import sys
 import os
 
-# Get the parent directory of the current directory (external_package)
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-
-# Add the parent directory to the Python path
-sys.path.append(parent_dir)
-print(parent_dir)
-
 from StellaratorDataSet import StellaratorDataSetInverse
 # Measure time
 from timeit import default_timer as timer
@@ -39,8 +32,6 @@ if __name__ == "__main__":
     # Setup device-agnostic code 
     if torch.cuda.is_available():
         device = "cuda" # NVIDIA GPU
-    # elif torch.backends.mps.is_available():
-    #     device = "mps" # Apple GPU
     else:
         device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
@@ -105,7 +96,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = None #torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,15,20,25,30,35,40,45], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10], gamma=0.1)
 
 
     # Create the writer for TensorBoard with help from utils.py
@@ -165,36 +156,6 @@ if __name__ == "__main__":
     utils.save_model(model=model,
                     target_dir=f"models/{model.__class__.__name__}",
                     model_name=f"{current_date}.pth")
-    
-    # # -----------------------------------------------------------------------------
-    # # Test the model using the test dataset with help from predictions.py
-
-    # # True vs Predicted
-    # y_true, y_pred = model.predict(test_dataloader,
-    #                                 device
-    # )
-
-    # # Confusion Matrix
-    # confuse = predictions.nfp_confusion_matrix(
-    #                         y_true=y_true,
-    #                         y_pred=y_pred,
-    #                         mean_labels=mean_std["mean_labels"],
-    #                         std_labels=mean_std["std_labels"]
-    # )
-
-    # # Add Confusion Matrix to TensorBoard
-    # writer.add_figure("Confusion Matrix", confuse)
-
-    # # Add Distributions of Means to TensorBoard
-    # for i in range(10):
-    #     distribution_hist = predictions.distribution_hist(y_true,
-    #                                                       y_pred,
-    #                                                       full_dataset.labels_names[i],
-    #                                                       i,
-    #                                                       mean_std["mean_labels"][i],
-    #                                                       mean_std["std_labels"][i]
-    #     )
-    #     writer.add_figure(f"Distribution of {full_dataset.labels_names[i]} ", distribution_hist)
 
     # Close the writer
     writer.close()

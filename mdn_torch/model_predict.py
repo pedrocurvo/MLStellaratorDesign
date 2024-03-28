@@ -1,21 +1,8 @@
 import torch
 import signal
-import multiprocessing
-import torch_optimizer as optim
 from tqdm import tqdm
-
-# Add Parent Directory to Python Path
-# Inside your Python script within the external_package directory
-import sys
 import os
 import numpy as np
-
-# Get the parent directory of the current directory (external_package)
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-
-# Add the parent directory to the Python path
-sys.path.append(parent_dir)
-print(parent_dir)
 
 from StellaratorDataSet import StellaratorDataSetInverse
 # Measure time
@@ -42,8 +29,6 @@ if __name__ == "__main__":
     # Setup device-agnostic code 
     if torch.cuda.is_available():
         device = "cuda" # NVIDIA GPU
-    # elif torch.backends.mps.is_available():
-    #     device = "mps" # Apple GPU
     else:
         device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
@@ -77,21 +62,21 @@ if __name__ == "__main__":
     import pandas as pd
     from preditcions_utils import sample_output, check_criteria, run_qsc, round_nfp
 
-    df = pd.read_csv('../data/good_stellarators_dataset_first.csv')
+    df = pd.read_csv('./data_good/good_stellarators_dataset_first.csv')
 
 
-    fname = '../data/predict_first.csv'
+    fname = './dump/predict_first.csv'
     print('Writing:', fname)
 
     if os.path.exists(fname):
         f = open(fname, 'a')
     else:
         f = open(fname, 'w')
-    print(','.join(df.columns), file=f)
+        print(','.join(df.columns), file=f)
 
     it = 0
     progress_bar = tqdm(
-        range(6000000), 
+        range(600000), 
         desc=f"Predicting", 
         leave=False,
         disable=False,
