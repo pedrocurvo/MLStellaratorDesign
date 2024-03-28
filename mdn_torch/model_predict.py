@@ -27,7 +27,7 @@ if __name__ == "__main__":
     ).to(device)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth", map_location=device))
 
     # -----------------------------------------------------------------------------
     # Load dataset with only good stellarators to generate samples
