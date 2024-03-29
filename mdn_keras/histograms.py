@@ -8,15 +8,20 @@ fname_0 = 'dataset_0.csv'
 print('Reading:', fname_0)
 df_0 = pd.read_csv(fname_0)
 
-fname_1 = 'dataset.csv'
+fname_1 = 'dataset_1.csv'
 print('Reading:', fname_1)
 df_1 = pd.read_csv(fname_1)
+
+fname_2 = 'dataset_2.csv'
+print('Reading:', fname_2)
+df_2 = pd.read_csv(fname_2)
 
 # -----------------------------------------------------------------------------
 
 for col in df_0.columns:
     values_0 = df_0[col].values
     values_1 = df_1[col].values
+    values_2 = df_2[col].values
 
     if col in ['nfp']:
         vmin = np.min(values_0) - 0.5
@@ -50,6 +55,7 @@ for col in df_0.columns:
 
     plt.hist(values_0, bins, density=True, alpha=0.5, label='dataset_0')
     plt.hist(values_1, bins, density=True, alpha=0.5, label='dataset_1')
+    plt.hist(values_2, bins, density=True, alpha=0.5, label='dataset_2')
 
     plt.title(col)
     plt.legend()
