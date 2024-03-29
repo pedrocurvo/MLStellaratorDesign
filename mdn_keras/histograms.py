@@ -8,7 +8,7 @@ fname_0 = 'dataset_0.csv'
 print('Reading:', fname_0)
 df_0 = pd.read_csv(fname_0)
 
-fname_1 = 'predict_0.csv'
+fname_1 = 'dataset.csv'
 print('Reading:', fname_1)
 df_1 = pd.read_csv(fname_1)
 
@@ -48,8 +48,8 @@ for col in df_0.columns:
 
     bins = np.linspace(vmin, vmax, num=num)
 
-    plt.hist(values_0, bins, density=True, alpha=0.5, label='dataset')
-    plt.hist(values_1, bins, density=True, alpha=0.5, label='predict')
+    plt.hist(values_0, bins, density=True, alpha=0.5, label='dataset_0')
+    plt.hist(values_1, bins, density=True, alpha=0.5, label='dataset_1')
 
     plt.title(col)
     plt.legend()
