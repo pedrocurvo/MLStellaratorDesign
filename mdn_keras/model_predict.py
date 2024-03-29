@@ -82,7 +82,7 @@ else:
 
 # -----------------------------------------------------------------------------
 
-batch_size = 5000
+batch_size = 1000
 
 with multiprocessing.Pool(cpus, initializer=ignore_sigint) as pool:
     while n_passed + n_failed < size:
