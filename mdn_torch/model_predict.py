@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Load mean_std from a file
-    mean_std = torch.load("models/mean_std.pth")
+    mean_std = torch.load("models/mean_std_2.pth")
 
     # Create model
     model = MDNFullCovariance(input_dim=10,
@@ -27,15 +27,17 @@ if __name__ == "__main__":
     ).to(device)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth", map_location=device))
+    #model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_30_02_40_44.pth"))
+
 
     # -----------------------------------------------------------------------------
     # Load dataset with only good stellarators to generate samples
-    df = pd.read_csv('./data_good/good_stellarators_dataset_first.csv')
+    df = pd.read_csv('./data_good/second_good_stels.csv')
 
     # -----------------------------------------------------------------------------
     # File to keep the new predictions
-    fname = './dump/predict_first.csv'
+    fname = '../data/third_dataset.csv'
     print('Writing:', fname)
 
     if os.path.exists(fname):
@@ -104,6 +106,8 @@ if __name__ == "__main__":
                 }
             )
             progress_bar.update()
+        
+    f.close()
 
             
             
