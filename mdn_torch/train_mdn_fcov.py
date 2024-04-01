@@ -55,7 +55,9 @@ if __name__ == "__main__":
                                                                     val_size=0.2,
                                                                     batch_size=BATCH_SIZE,
                                                                     num_workers=NUM_OF_WORKERS
-)
+)   
+    # Save the mean_std with the same name as the model
+    torch.save(mean_std, f"models/mean_std_{current_date}.pth")
 
     # Create model
     model = MDNFullCovariance(input_dim=10,
