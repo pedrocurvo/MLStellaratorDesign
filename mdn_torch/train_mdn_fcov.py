@@ -23,11 +23,11 @@ if __name__ == "__main__":
     current_date = now.strftime("%Y_%m_%d_%H_%M_%S")
 
     # Download the dataset
-    data_setup.download_data('../data/dataset.csv')
+    #data_setup.download_data('../data/second_dataset.csv')
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../data/dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='../data/second_dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
+    #model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,100,300], gamma=0.1)
 
 
     # Create the writer for TensorBoard with help from utils.py
