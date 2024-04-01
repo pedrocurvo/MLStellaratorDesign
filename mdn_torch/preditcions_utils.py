@@ -94,6 +94,8 @@ def sample_output(dataset):
             'L_grad_grad_B', 'B20_variation', 'beta',
             'DMerc_times_r2']
 
-    sample = [np.random.choice(dataset[col].values) for col in cols]
+    n = dataset.shape[0]
+
+    sample = [dataset[col].iloc[np.random.randint(n)] for col in cols]
 
     return sample
