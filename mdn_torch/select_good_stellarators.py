@@ -2,7 +2,10 @@ import pandas as pd
 import numpy as np
 
 # Load the dataset
-df = pd.read_csv('../data/predict_first.csv')
+df = pd.read_csv('../data/second_dataset.csv')
+
+# Print the shape of the dataset
+print(f"Shape of the dataset: {df.shape}")
 
 # Select the rows with axis_length > 0
 df = df[df['axis_length'] > 0]
@@ -41,6 +44,6 @@ print(df.head())
 print(f"Shape of the filtered dataset: {df.shape}")
 
 # Save the filtered dataset to a new CSV file
-#df.to_csv('../data/good_stellarators_dataset_first.csv', index=False)
+df.to_csv('./data_good/second_good_stels.csv', index=False)
 
 
