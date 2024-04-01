@@ -40,8 +40,10 @@ if __name__ == "__main__":
     fname = '../data/third_dataset.csv'
     print('Writing:', fname)
 
+    current_file_len = 0
     if os.path.exists(fname):
         f = open(fname, 'a')
+        current_file_len = sum(1 for line in open(fname))
     else:
         f = open(fname, 'w')
         print(','.join(df.columns), file=f)
@@ -51,7 +53,7 @@ if __name__ == "__main__":
 
     it = 0
     progress_bar = tqdm(
-        range(600000), 
+        range(600000 - current_file_len), 
         desc=f"Predicting", 
         leave=False,
         disable=False,
