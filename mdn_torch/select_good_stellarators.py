@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # Load the dataset
-df = pd.read_csv('../data/third_dataset.csv')
+df = pd.read_csv('../data/fourth_dataset.csv')
 
 # Print the shape of the dataset
 print(f"Shape of the dataset: {df.shape}")
@@ -44,6 +44,6 @@ print(df.head())
 print(f"Shape of the filtered dataset: {df.shape}")
 
 # Save the filtered dataset to a new CSV file
-df.to_csv('./data_good/third_good_stels.csv', index=False)
+df.to_csv('./data_good/fourth_good_stels.csv', index=False)
 
 
