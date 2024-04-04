@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_02_15_47_52.pth")) # 3
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_03_10_03_21.pth")) # 4
     model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_01_37_38.pth")) # 5
+    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_13_41_19.pth")) # combined
 
 
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 
     it = 0
     progress_bar = tqdm(
-        range(600000 - current_file_len), 
+        range(382000 - current_file_len), 
         desc=f"Predicting", 
         leave=False,
         disable=False,
