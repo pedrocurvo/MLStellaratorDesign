@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Load mean_std from a file
-    mean_std = torch.load("models/mean_std_4.pth")
+    mean_std = torch.load("models/mean_std_5.pth")
 
     # Create model
     model = MDNFullCovariance(input_dim=10,
@@ -30,17 +30,18 @@ if __name__ == "__main__":
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth")) # 1
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_30_02_40_44.pth")) # 2
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_02_15_47_52.pth")) # 3
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_03_10_03_21.pth")) # 3
+    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_03_10_03_21.pth")) # 4
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_01_37_38.pth")) # 5
 
 
 
     # -----------------------------------------------------------------------------
     # Load dataset with only good stellarators to generate samples
-    df = pd.read_csv('./data_good/fourth_good_stels.csv')
+    df = pd.read_csv('./data_good/fifth_good_stels.csv')
 
     # -----------------------------------------------------------------------------
     # File to keep the new predictions
-    fname = './dump/fifth_dataset.csv'
+    fname = './dump/sixth_dataset.csv'
     print('Writing:', fname)
 
     current_file_len = 0

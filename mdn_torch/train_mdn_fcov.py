@@ -24,11 +24,11 @@ if __name__ == "__main__":
 
     # Download the dataset
     #data_setup.download_data('../data/second_dataset.csv')
-    #data_setup.convert_csv_to_npy('../data/fourth_dataset.csv')
+    #data_setup.convert_csv_to_npy('../data/fifth_dataset.csv')
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../data/fourth_dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='../data/fifth_dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():

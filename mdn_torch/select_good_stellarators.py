@@ -1,8 +1,13 @@
-import pandas as pd 
+import modin.pandas as pd 
 import numpy as np
 
 # Load the dataset
-df = pd.read_csv('../data/fourth_dataset.csv')
+df = pd.read_csv('../data/fifth_dataset.csv')
+
+# Find NaN values in the dataset
+# data = np.load('../data/fifth_dataset.npy')
+# df = pd.DataFrame(data)
+# df.to_csv('../data/fifth_dataset.csv', index=False, header=df_4.columns)
 
 # Print the shape of the dataset
 print(f"Shape of the dataset: {df.shape}")
@@ -44,6 +49,6 @@ print(df.head())
 print(f"Shape of the filtered dataset: {df.shape}")
 
 # Save the filtered dataset to a new CSV file
-df.to_csv('./data_good/fourth_good_stels.csv', index=False)
+df.to_csv('./data_good/fifth_good_stels.csv', index=False)
 
 
