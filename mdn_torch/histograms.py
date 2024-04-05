@@ -29,6 +29,11 @@ fname_4 = './data_good/fifth_good_stels.csv'
 print('Reading:', fname_4)
 df_4 = pd.read_csv(fname_4)
 
+#fname_5 = '../data/sixth_dataset.csv'
+fname_5 = './data_good/sixth_good_stels.csv'
+print('Reading:', fname_5)
+df_5 = pd.read_csv(fname_5)
+
 # -----------------------------------------------------------------------------
 
 for col in df_0.columns:
@@ -38,15 +43,17 @@ for col in df_0.columns:
         values_2 = df_2['axis_length'].values
         values_3 = df_3['axis_length'].values
         values_4 = df_4['axis_length'].values
+        values_5 = df_5['axis_length'].values
     else:
         values_1 = df_1[col].values
         values_2 = df_2[col].values
         values_3 = df_3[col].values
         values_4 = df_4[col].values
+        values_5 = df_5[col].values
 
     if col in ['nfp']:
-        vmin = np.min(values_3) - 0.5
-        vmax = np.max(values_3) + 0.5
+        vmin = np.min(values_5) - 0.5
+        vmax = np.max(values_5) + 0.5
         num = int(round(vmax - vmin + 1))
 
     # elif col in ['iota', 'r_singularity', 'min_L_grad_B']:
@@ -79,6 +86,7 @@ for col in df_0.columns:
     plt.hist(values_2, bins, density=True, alpha=0.5, label='pred_2', log=True)
     plt.hist(values_3, bins, density=True, alpha=0.5, label='pred_3', log=True)
     plt.hist(values_4, bins, density=True, alpha=0.5, label='pred_4', log=True)
+    plt.hist(values_5, bins, density=True, alpha=0.5, label='pred_5', log=True)
 
     plt.title(col)
     plt.legend()
@@ -92,7 +100,7 @@ for col in df_0.columns:
 import seaborn as sns
 
 # Compute the correlation matrix
-correlation_matrix = df_3.corr(method='spearman')
+correlation_matrix = df_4.corr(method='spearman')
 
 # Plot the correlation matrix
 plt.figure(figsize=(20, 20))
