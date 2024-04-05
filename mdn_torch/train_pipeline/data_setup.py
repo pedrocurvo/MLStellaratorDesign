@@ -147,7 +147,7 @@ def create_dataloaders(
     # Turn datasets into iterable objects (batches)
     train_loader = DataLoader(dataset=train_dataset, # dataset to turn into iterable batches
                             batch_size=batch_size, # samples per batch
-                            shuffle=False, # shuffle data (for training set only)
+                            shuffle=True, # shuffle data (for training set only)
                             num_workers=num_workers, # subprocesses to use for data loading
                             drop_last=True, # drop the last batch if it is not complete
                             multiprocessing_context='fork', # this ensures that the DataLoader is fork-safe and can be used in a multiprocessing environment (num_workers > 0)
