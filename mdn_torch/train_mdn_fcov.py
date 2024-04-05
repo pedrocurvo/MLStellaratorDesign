@@ -24,11 +24,11 @@ if __name__ == "__main__":
 
     # Download the dataset
     #data_setup.download_data('../data/second_dataset.csv')
-    #data_setup.convert_csv_to_npy('../data/fifth_dataset.csv')
+    # data_setup.convert_csv_to_npy('../data/combined.csv')
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../data/fifth_dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='../data/sixth_dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     # Turn datasets into iterable objects (batches)
     # Create DataLoaders with help from data_setup.py
     train_dataloader, val_dataloader, test_dataloader, mean_std = data_setup.create_dataloaders(dataset=full_dataset,
-                                                                    train_size=0.5,
-                                                                    val_size=0.2,
+                                                                    train_size=0.725,
+                                                                    val_size=0.27,
                                                                     batch_size=BATCH_SIZE,
                                                                     num_workers=NUM_OF_WORKERS
 )   
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     #                               momentum=MOMENTUM, centered=False)
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,100,300], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,200,300], gamma=0.1)
 
 
     # Create the writer for TensorBoard with help from utils.py
