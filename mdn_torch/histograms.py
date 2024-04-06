@@ -5,32 +5,32 @@ import matplotlib.pyplot as plt
 # -----------------------------------------------------------------------------
 
 #fname_0 = '../data/first_dataset.csv'
-fname_0 = './data_good/first_good_stels.csv'
+fname_0 = '../data/first_good_stels.csv'
 print('Reading:', fname_0)
 df_0 = pd.read_csv(fname_0)
 
 #fname_1 = '../data/second_dataset.csv'
-fname_1 = './data_good/second_good_stels.csv'
+fname_1 = '../data/second_good_stels.csv'
 print('Reading:', fname_1)
 df_1 = pd.read_csv(fname_1)
 
 #fname_2 = '../data/third_dataset.csv'
-fname_2 = './data_good/third_good_stels.csv'
+fname_2 = '../data/third_good_stels.csv'
 print('Reading:', fname_2)
 df_2 = pd.read_csv(fname_2)
 
 #fname_3 = '../data/fourth_dataset.csv'
-fname_3 = './data_good/fourth_good_stels.csv'
+fname_3 = '../data/fourth_good_stels.csv'
 print('Reading:', fname_3)
 df_3 = pd.read_csv(fname_3)
 
 #fname_4 = '../data/fifth_dataset.csv'
-fname_4 = './data_good/fifth_good_stels.csv'
+fname_4 = '../data/fifth_good_stels.csv'
 print('Reading:', fname_4)
 df_4 = pd.read_csv(fname_4)
 
 #fname_5 = '../data/sixth_dataset.csv'
-fname_5 = './data_good/sixth_good_stels.csv'
+fname_5 = '../data/sixth_good_stels.csv'
 print('Reading:', fname_5)
 df_5 = pd.read_csv(fname_5)
 
@@ -90,7 +90,8 @@ for col in df_0.columns:
 
     plt.title(col)
     plt.legend()
-    plt.savefig(f'./histograms_good/{col}.png')
+    plt.savefig(f'./visual_metrics/histograms_good/{col}.png')
+    print('Saved:', f'./visual_metrics/histograms_good/{col}.png')
     plt.close()
     #plt.show()
 
@@ -100,13 +101,13 @@ for col in df_0.columns:
 import seaborn as sns
 
 # Compute the correlation matrix
-correlation_matrix = df_4.corr(method='spearman')
+correlation_matrix = df_5.corr(method='spearman')
 
 # Plot the correlation matrix
 plt.figure(figsize=(20, 20))
 sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm')
 plt.title('Correlation Matrix, Dataset3, Good Stels, Method: Spearman')
-plt.savefig('./correlations_matrices_good/full_correlation_matrix_good.png')
+plt.savefig('./visual_metrics/correlations_matrices_good/full_correlation_matrix_good.png')
 plt.close()
 
 # -----------------------------------------------------------------------------
@@ -119,5 +120,5 @@ for nfp in range(2, 10):
     plt.figure(figsize=(20, 20))
     sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm')
     plt.title(f'Correlation Matrix, Dataset3, Good Stels, NFP={nfp}, Method: Spearman')
-    plt.savefig(f'./correlations_matrices_good/correlation_matrix_good_nfp_{nfp}.png')
+    plt.savefig(f'./visual_metrics/correlations_matrices_good/correlation_matrix_good_nfp_{nfp}.png')
     plt.close()
