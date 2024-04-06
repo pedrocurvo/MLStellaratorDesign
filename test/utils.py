@@ -83,7 +83,7 @@ def predictor(axis_length=None, iota=None, max_elongation=None, min_L_grad_B=Non
         # Sample input
         sample = np.array([axis_length, iota, max_elongation, min_L_grad_B, min_R0, r_singularity, 
                            L_grad_grad_B, B20_variation, beta, DMerc_times_r2], dtype=np.float32)
-        sample = np.where(sample == None, mean_std["mean_labels"], sample)
+        sample = np.where(sample == None, mean_std["mean_labels"].cpu(), sample)
 
         configurations = []
         values_for_qsc = []
