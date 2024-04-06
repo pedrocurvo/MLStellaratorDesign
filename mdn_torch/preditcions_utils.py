@@ -96,6 +96,9 @@ def sample_output(dataset):
 
     n = dataset.shape[0]
 
-    sample = [dataset[col].iloc[np.random.randint(n)] for col in cols]
+    row_index = np.random.randint(n)  # Randomly select a row index
+
+    sample = [dataset[col].iloc[np.random.randint(n)] if col != 'r_singularity' and col != 'beta'
+              else dataset[col].iloc[row_index] for col in cols]
 
     return sample
