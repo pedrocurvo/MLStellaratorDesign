@@ -1,4 +1,4 @@
-import modin.pandas as pd 
+import pandas as pd 
 import numpy as np
 
 # Load the dataset
@@ -31,6 +31,6 @@ print(df.head())
 print(f"Shape of the filtered dataset: {df.shape}")
 
 # Save the filtered dataset to a new CSV file
-df.to_csv('./data_good/sixth_good_stels.csv', index=False)
+df.to_csv('../data/sixth_good_stels.csv', index=False)
 
 
