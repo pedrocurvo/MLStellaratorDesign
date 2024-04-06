@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Load mean_std from a file
-    mean_std = torch.load("models/mean_std_5.pth")
+    mean_std = torch.load("models/mean_std_2024_04_05_01_01_18.pth", map_location=torch.device('cpu'))
 
     # Create model
     model = MDNFullCovariance(input_dim=10,
@@ -31,18 +31,19 @@ if __name__ == "__main__":
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_30_02_40_44.pth")) # 2
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_02_15_47_52.pth")) # 3
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_03_10_03_21.pth")) # 4
-    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_01_37_38.pth")) # 5
+    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_01_37_38.pth", map_location=torch.device('cpu'))) # 5
     # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_04_13_41_19.pth")) # combined
+    model.load_state_dict(torch.load("models/MDNFullCovariance/2024_04_05_01_01_18.pth", map_location=torch.device('cpu'))) # 5
 
 
 
     # -----------------------------------------------------------------------------
     # Load dataset with only good stellarators to generate samples
-    df = pd.read_csv('./data_good/fifth_good_stels.csv')
+    df = pd.read_csv('../data/sixth_good_stels.csv')
 
     # -----------------------------------------------------------------------------
     # File to keep the new predictions
-    fname = './dump/sixth_dataset.csv'
+    fname = './dump/seventh_dataset.csv'
     print('Writing:', fname)
 
     current_file_len = 0
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 
     it = 0
     progress_bar = tqdm(
-        range(382000 - current_file_len), 
+        range(100000 - current_file_len), 
         desc=f"Predicting", 
         leave=False,
         disable=False,
