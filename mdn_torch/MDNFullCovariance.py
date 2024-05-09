@@ -4,8 +4,6 @@ Contains PyTorch model code for Mixture Density Network.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from tqdm import tqdm
 import torch.distributions as dist
 
 class MDNFullCovariance(nn.Module):
