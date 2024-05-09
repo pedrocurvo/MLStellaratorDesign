@@ -4,7 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from MDNFullCovariance import MDNFullCovariance
-from preditcions_utils import sample_output, check_criteria, run_qsc, round_nfp
+from utils import check_criteria, run_qsc, sample_output, round_nfp
 
 
 # -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # -----------------------------------------------------------------------------
     # Load dataset with only good stellarators to generate samples
-    df = pd.read_csv('../data/sixth_good_stels.csv')
+    df = pd.read_csv('../data/6_dataset/sixth_good_stels.csv')
 
     # -----------------------------------------------------------------------------
     # File to keep the new predictions
