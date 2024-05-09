@@ -1,9 +1,4 @@
 import torch
-import torch_optimizer as optim
-
-# Add Parent Directory to Python Path
-# Inside your Python script within the external_package directory
-import sys
 import os
 
 from StellaratorDataSet import StellaratorDataSetInverse
@@ -23,7 +18,7 @@ if __name__ == "__main__":
     current_date = now.strftime("%Y_%m_%d_%H_%M_%S")
 
     # Download the dataset
-    #data_setup.download_data('../data/second_dataset.csv')
+    # data_setup.download_data('../data/second_dataset.csv')
     # data_setup.convert_csv_to_npy('../data/combined.csv')
 
     # Dataset
@@ -85,22 +80,8 @@ if __name__ == "__main__":
                                 weight_decay=0
     )
 
-    # optimizer = optim.Adahessian(model.parameters(),
-    #                             lr= LEARNING_RATE,
-    #                             betas= (0.9, 0.999),
-    #                             eps= 1e-8,
-    #                             weight_decay=0.0,
-    #                             hessian_power=0.5,
-    # )   
-    # optimizer=torch.optim.RMSprop(model.parameters(),
-    #                               lr=LEARNING_RATE,
-    #                               alpha=0.9, eps=1e-07,
-    #                               weight_decay=0,
-    #                               momentum=MOMENTUM, centered=False)
-
     # Learning Rate Scheduler
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,200,300], gamma=0.1)
-
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",
