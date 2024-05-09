@@ -2,15 +2,11 @@
 Utility functions to make predictions and evaluate the model.
 """
 import torch
-import torch.nn.functional as F
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix
-from torchinfo import summary
 from tqdm import tqdm
-import io
 
 def predict(model, data, device):
     """
