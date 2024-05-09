@@ -6,7 +6,7 @@ import os
 from tabulate import tabulate
 
 from .MDNFullCovariance import MDNFullCovariance
-from .preditcions_utils import run_qsc, round_nfp
+from .utils import run_qsc, round_nfp
 
 def qsc_predictor(
     axis_length=None,
