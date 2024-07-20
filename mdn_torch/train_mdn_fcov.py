@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../data/sixth_dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='../data/6_dataset/sixth_dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():

@@ -138,8 +138,11 @@ def qsc_predictor(
     # Run iterations
     for it in tqdm(range(iterations), leave=False, desc="Iterations"):
         with torch.no_grad():
-            # Predict using model
-            model_outputs = model.getMixturesSample(model_inputs_normalized.unsqueeze(0), device)
+            try: 
+                # Predict using model
+                model_outputs = model.getMixturesSample(model_inputs_normalized.unsqueeze(0), device)
+            except:
+                continue
 
         # Denormalize output
         model_outputs = model_outputs * mean_std["std_labels"].to(device) + mean_std["mean_labels"].to(device)
