@@ -19,11 +19,13 @@ def parser():
     parser.add_argument("--num_epochs", "--epochs" ,type=int, default=10, help="Number of epochs")
     parser.add_argument("--learning_rate", "-lr", type=float, default=0.01, help="Learning rate")
     parser.add_argument("--weight_decay", type=float, default=0, help="Weight decay")
+    parser.add_argument("--transfer_model", type=str, default=None, help="Transfer model")
     parser.add_argument("--loss_function",
                         type=str,
                         default="MSELoss",
                         choices=["L1Loss", "MSELoss", "HuberLoss", "SmoothL1Loss"],
                         help="Loss function")
+    parser.add_argument("--data", type=str, default=None, help="Path to data, should be a .npy file")
     args = parser.parse_args()
     return args
 

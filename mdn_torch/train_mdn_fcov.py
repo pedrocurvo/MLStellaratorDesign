@@ -21,9 +21,12 @@ if __name__ == "__main__":
     # data_setup.download_data('../data/second_dataset.csv')
     # data_setup.convert_csv_to_npy('../data/combined.csv')
 
+    # Data File Path
+    DATA_PATH = args.data
+
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../../data/6_dataset/sixth_dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file=DATA_PATH)
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -34,13 +37,14 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     # Setup a Seed for Reproducibility
-    torch.manual_seed(torch.randint(0, 100000, (1,)).item())
+    torch.manual_seed(42)
 
     # Setup the Hyperparameters
     BATCH_SIZE = args.batch_size
     NUM_EPOCHS = args.num_epochs
     LEARNING_RATE = args.learning_rate
     WEIGHT_DECAY = args.weight_decay
+    TRANSFER_MODEL = args.transfer_model
     MOMENTUM = 0
     NUM_OF_WORKERS = os.cpu_count()
 
@@ -69,7 +73,9 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
+    if TRANSFER_MODEL:
+        model.load_state_dict(torch.load(f"models/{TRANSFER_MODEL}.pth"))
+        print(f"Transferred model: {TRANSFER_MODEL}")
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
