@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Dataset
     # Load the data
-    full_dataset = StellaratorDataSetInverse(npy_file='../data/6_dataset/sixth_dataset.npy')
+    full_dataset = StellaratorDataSetInverse(npy_file='../../data/6_dataset/sixth_dataset.npy')
 
     # Setup device-agnostic code 
     if torch.cuda.is_available():
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             torch.nn.init.zeros_(param)
     
     # Load a previous model (optional: uncomment if you want to load a previous model): transfer learning
-    #model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
+    # model.load_state_dict(torch.load("models/MDNFullCovariance/2024_03_28_11_53_42.pth"))
 
     # Set up loss function and optimizer
     loss_fn = model.log_prob_loss
