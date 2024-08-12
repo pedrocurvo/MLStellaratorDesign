@@ -74,20 +74,8 @@ def qsc_predictor(
     model = MDNFullCovariance(**model_params).to(device)
 
     # Load models and mean_stds
-    models = [ #"../mdn_torch/models/MDNFullCovariance/2024_03_28_11_53_42.pth",
-    #           "../mdn_torch/models/MDNFullCovariance/2024_03_30_02_40_44.pth",
-    #           "../mdn_torch/models/MDNFullCovariance/2024_04_02_15_47_52.pth",
-    #           "../mdn_torch/models/MDNFullCovariance/2024_04_03_10_03_21.pth",
-    #           "../mdn_torch/models/MDNFullCovariance/2024_04_04_01_37_38.pth",
-    #           "../mdn_torch/models/MDNFullCovariance/2024_04_04_13_41_19.pth",
-              "./models/MDNFullCovariance/2024_04_05_01_01_18.pth"]
-    mean_stds = [   # "../mdn_torch/models/mean_std.pth",
-                    #  "../mdn_torch/models/mean_std_2.pth",
-                    #  "../mdn_torch/models/mean_std_3.pth",
-                    #  "../mdn_torch/models/mean_std_4.pth",
-                    #  "../mdn_torch/models/mean_std_5.pth",
-                    #  "../mdn_torch/models/mean_std_combined.pth",
-                 "./models/mean_std_5.pth"]
+    models = ["./models/MDNFullCovariance/model_05.pth"]
+    mean_stds = ["./models/mean_std_05.pth"]
 
     # Initialize lists to store configurations and values for Qsc
     current_dir = os.path.dirname(os.path.abspath(__file__))
