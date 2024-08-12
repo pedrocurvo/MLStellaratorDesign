@@ -36,15 +36,13 @@ The project is structured as follows:
 .
 ├── images
 ├── models
+├── notebooks
 ├── runs
 ├── StellaratorDataSet
 ├── train_pipeline
 ├── utils
 ├── __init__.py
-├── data_analysis.ipynb
-├── data_loss.py
-├── iterations_correlation.ipynb
-├── iterations_histograms.ipynb
+├── MDNFullCovariance.py
 ├── qsc_predictor.py
 ├── README.md
 └── train_mdn_fcov.py
@@ -52,7 +50,9 @@ The project is structured as follows:
 
 ```images```: Directory containing the images/graphs coming from the notebooks.
 
-```models```: Directory containing the dictionaries of the trained models and means, the models are resgistred with the date and time of the training.
+```models```: Directory containing the dictionaries of the trained models and means, the models are resgistred with 01 to 06 to simplify, but, when they were trainned, they are kept with the date time.
+
+```notebooks```: Directory containing the Jupyter notebooks used to analyze the data, the iterations and the models performance.
 
 ```runs```: Directory containing the TensorBoard logs of the training.
 
@@ -60,15 +60,11 @@ The project is structured as follows:
 
 ```train_pipeline```: Directory containing the modules used to train the model.
 
-```utils```: Directory containing the utility functions.
-
-```data_analysis.ipynb```: Jupyter notebook containing the analysis of the datasets and iterations.
-
-```data_loss.py```: Module containing the calculation of the loss for the generation of new stellarators using trained models.
-
-```iterations_correlation.ipynb```: Jupyter notebook containing the correlation analysis of the iterations.
-
-```iterations_histograms.ipynb```: Jupyter notebook containing the histograms of the iterations.
+```utils```: Directory containing utility functions.
+  
+```__init__.py```: File to make the directory a package.
+  
+```MDNFullCovariance.py```: Module containing the MDN torch model.
 
 ```qsc_predictor.py```: Module containing the function to use the model to predict 
 new stellarators, provides a better Human-Interface.
@@ -79,12 +75,16 @@ new stellarators, provides a better Human-Interface.
 
 ## How to run the code
 
-To train the model, first you need to have a data directory containing the dataset in numpy format. The dataset should be a numpy array with the shape (n_samples, n_features), where n_samples is the number of stellarators and n_features is the number of features used to describe the stellarators.
+To train the model, first you need to have a ```data``` directory in the root containing the dataset in numpy format. The dataset should be a numpy array with the shape ```(n_samples, n_features)```, where ```n_samples``` is the number of stellarators and ```n_features``` is the number of features used to describe the stellarators.
 
 To train the model, you can run the following command:
 
 ```bash
-python3 train_mdn_fcov.py --batch_size batch_size --num_epochs num_epochs --learning_rate learning_rate 
+python3 train_mdn_fcov.py \
+--batch_size batch_size \
+--num_epochs num_epochs \
+--learning_rate learning_rate \
+--data path/to/your/data.npy
 ```
 
 Where:
@@ -92,4 +92,15 @@ Where:
 batch_size: The batch size used for training the model.
 num_epochs: The number of epochs used for training the model.
 learning_rate: The learning rate used for training the model.
+data: The path to the dataset in numpy format.
 ```
+For the models trained in this project, the following hyperparameters were used:
+```
+batch_size: 10000
+num_epochs: 100
+learning_rate: 1e-3
+```
+
+The training also uses a Scheduler to reduce the learning rate when the loss stops decreasing. You can change the parameters of the scheduler in the ```train_mdn_fcov.py``` file.
+
+You can also use the TensorBoard to visualize the training process. You can use the VSCode TensorBoard extension on the ```runs``` directory to visualize the training process.
