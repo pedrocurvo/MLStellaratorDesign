@@ -53,7 +53,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Load mean_std from a file
-    mean_std = torch.load(MODEL_MEAN)
+    mean_std = torch.load(MODEL_MEAN, map_location=torch.device('cpu'))
 
     # Create model
     model = MDNFullCovariance.MDNFullCovariance(input_dim=10,
@@ -61,7 +61,7 @@ if __name__ == "__main__":
                             num_gaussians=62
     ).to(device)
     
-    model.load_state_dict(torch.load(MODEL))
+    model.load_state_dict(torch.load(MODEL, map_location=torch.device('cpu')))
 
 
 
