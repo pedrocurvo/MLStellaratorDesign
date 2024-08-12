@@ -87,7 +87,7 @@ if __name__ == "__main__":
     )
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5,10,200,300], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20, 30, 40, 50], gamma=0.5)
 
     # Create the writer for TensorBoard with help from utils.py
     writer = utils.create_writer(experiment_name=f"{full_dataset.__class__.__name__}",
