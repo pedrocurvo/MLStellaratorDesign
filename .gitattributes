@@ -1,1 +1,2 @@
-
+# Ignore .ipynb for statistics
+*.ipynb linguist-vendored
