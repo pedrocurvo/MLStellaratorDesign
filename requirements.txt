@@ -84,7 +84,7 @@ tensorflow-io-gcs-filesystem==0.37.0
 tensorflow-probability==0.24.0
 termcolor==2.4.0
 threadpoolctl==3.5.0
-torch==2.3.0
+torch==2.7.0
 torch-optimizer==0.3.0
 torchaudio==2.3.0
 torchinfo==1.8.0
